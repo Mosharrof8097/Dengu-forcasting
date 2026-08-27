@@ -158,8 +158,13 @@ DISTRICT_BASE_CASES = {
     "Faridpur": 30.0
 }
 
+frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend"))
+
 @app.get("/")
-def root():
+def serve_index():
+    index_path = os.path.join(frontend_dir, "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
     return {
         "status": "online",
         "system": "EpiST-Shield Decision Support API",
@@ -168,6 +173,18 @@ def root():
         "focal_districts": len(DISTRICTS_11),
         "supported_horizons": [7, 14, 21, 30]
     }
+
+@app.get("/api/health")
+def api_health():
+    return {
+        "status": "online",
+        "system": "EpiST-Shield Decision Support API",
+        "model_loaded": model is not None,
+        "tensorflow_available": HAS_TF,
+        "focal_districts": len(DISTRICTS_11),
+        "supported_horizons": [7, 14, 21, 30]
+    }
+
 
 @app.get("/api/districts")
 def get_districts():
