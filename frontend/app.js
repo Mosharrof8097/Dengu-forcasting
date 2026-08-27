@@ -21,14 +21,29 @@ const DISTRICT_COORDS = {
   "Mymensingh": [24.7471, 90.4203]
 };
 
+// District Baseline Parameters for Realistic Epidemiological Profiling
+const DISTRICT_DEFAULTS = {
+  "Dhaka":       { rainfall: 85.0, temp: 30.5, humidity: 82.0, lag7: 75.0, lag14: 70.0, lag21: 65.0 },
+  "Chittagong":  { rainfall: 80.0, temp: 29.5, humidity: 84.0, lag7: 55.0, lag14: 50.0, lag21: 45.0 },
+  "Gazipur":     { rainfall: 65.0, temp: 29.5, humidity: 80.0, lag7: 42.0, lag14: 38.0, lag21: 35.0 },
+  "Narayanganj": { rainfall: 60.0, temp: 30.0, humidity: 81.0, lag7: 40.0, lag14: 36.0, lag21: 32.0 },
+  "Mymensingh":  { rainfall: 50.0, temp: 28.5, humidity: 79.0, lag7: 32.0, lag14: 28.0, lag21: 25.0 },
+  "Khulna":      { rainfall: 35.0, temp: 29.0, humidity: 78.0, lag7: 25.0, lag14: 22.0, lag21: 20.0 },
+  "Cumilla":     { rainfall: 30.0, temp: 28.5, humidity: 77.0, lag7: 22.0, lag14: 20.0, lag21: 18.0 },
+  "Barishal":    { rainfall: 25.0, temp: 28.0, humidity: 78.0, lag7: 18.0, lag14: 16.0, lag21: 14.0 },
+  "Faridpur":    { rainfall: 22.0, temp: 28.0, humidity: 76.0, lag7: 16.0, lag14: 14.0, lag21: 12.0 },
+  "Rajshahi":    { rainfall: 15.0, temp: 27.5, humidity: 72.0, lag7: 12.0, lag14: 10.0, lag21: 8.0 },
+  "Sylhet":      { rainfall: 18.0, temp: 26.5, humidity: 75.0, lag7: 10.0, lag14: 8.0,  lag21: 6.0 }
+};
+
 // Application State
 const state = {
   location: "Mymensingh",
   horizon: 30, // Default: 30 Days
   theme: "light",
-  simRainfall: 85.4,
-  simTemp: 29.5,
-  simHumidity: 82.0,
+  simRainfall: DISTRICT_DEFAULTS["Mymensingh"].rainfall,
+  simTemp: DISTRICT_DEFAULTS["Mymensingh"].temp,
+  simHumidity: DISTRICT_DEFAULTS["Mymensingh"].humidity,
   forecastData: null,
   map: null,
   mapMarkers: {},
@@ -139,10 +154,31 @@ function initPeriodTabs() {
   });
 }
 
+function applyDistrictDefaults(dist) {
+  const profile = DISTRICT_DEFAULTS[dist] || DISTRICT_DEFAULTS["Mymensingh"];
+  state.simRainfall = profile.rainfall;
+  state.simTemp = profile.temp;
+  state.simHumidity = profile.humidity;
+
+  if (el.simRainfallInput) {
+    el.simRainfallInput.value = profile.rainfall;
+    el.simRainfallVal.textContent = `${profile.rainfall.toFixed(1)} mm`;
+  }
+  if (el.simTempInput) {
+    el.simTempInput.value = profile.temp;
+    el.simTempVal.textContent = `${profile.temp.toFixed(1)} °C`;
+  }
+  if (el.simHumidityInput) {
+    el.simHumidityInput.value = profile.humidity;
+    el.simHumidityVal.textContent = `${profile.humidity.toFixed(1)} %`;
+  }
+}
+
 // Location Selector Handler
 function initLocationPicker() {
   el.locationSelect.addEventListener("change", (e) => {
     state.location = e.target.value;
+    applyDistrictDefaults(state.location);
     if (state.map && DISTRICT_COORDS[state.location]) {
       state.map.flyTo(DISTRICT_COORDS[state.location], 10, { duration: 1.2 });
     }
@@ -198,6 +234,7 @@ function initMap() {
     marker.on("click", () => {
       state.location = dist;
       el.locationSelect.value = dist;
+      applyDistrictDefaults(dist);
       state.map.flyTo(coords, 10, { duration: 1.2 });
       fetchForecastData();
     });
@@ -209,15 +246,16 @@ function initMap() {
 // Fetch Multi-Horizon Forecast API
 async function fetchForecastData() {
   try {
+    const profile = DISTRICT_DEFAULTS[state.location] || { lag7: 30, lag14: 25, lag21: 20 };
     const payload = {
       district: state.location,
       horizon_days: state.horizon,
       rainfall_7d: state.simRainfall,
       temperature_7d: state.simTemp,
       humidity_7d: state.simHumidity,
-      cases_lag_7: 45.0,
-      cases_lag_14: 40.0,
-      cases_lag_21: 35.0,
+      cases_lag_7: profile.lag7,
+      cases_lag_14: profile.lag14,
+      cases_lag_21: profile.lag21,
       vector_control_active: false
     };
     

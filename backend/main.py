@@ -287,10 +287,10 @@ def generate_multi_horizon_forecast(req: MultiHorizonRequest):
         high_risk_warning = f"No severe high-risk surge above 50 cases/day projected for {req.district}. Peak activity expected on Day {actual_peak_day}."
         has_high_risk = False
         
-    if peak_cases >= 50 or daily_avg >= 40:
+    if peak_cases >= 50.0 or daily_avg >= 45.0:
         risk_level = "HIGH"
         risk_color = "#EF4444"
-    elif peak_cases >= 25 or daily_avg >= 20:
+    elif peak_cases >= 30.0 or daily_avg >= 25.0:
         risk_level = "MODERATE"
         risk_color = "#F59E0B"
     else:
