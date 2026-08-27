@@ -596,268 +596,29 @@ function initModalListeners() {
   });
 }
 
-// Guaranteed Crisp PDF Export Generator (Fixes Blank Page Issue)
+// Guaranteed Crisp Vector PDF Export Generator
 function initPdfExport() {
-  el.pdfBtn.addEventListener("click", async () => {
+  el.pdfBtn.addEventListener("click", () => {
     if (!state.forecastData) return;
     
-    const origHtml = el.pdfBtn.innerHTML;
-    el.pdfBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Generating PDF...`;
-    el.pdfBtn.disabled = true;
+    // Update printable header metadata
+    const distEl = document.getElementById("print-district-name");
+    const timeEl = document.getElementById("print-report-time");
     
-    const originalScrollX = window.scrollX;
-    const originalScrollY = window.scrollY;
-
-    try {
-      const data = state.forecastData;
-      const casesArr = data.forecast_chart.cases;
-      const labelsArr = data.forecast_chart.labels;
-      
-      // 1. Scroll window to top (0, 0) synchronously so html2canvas renders from origin
-      window.scrollTo(0, 0);
-      
-      // 2. Capture Forecast Chart Canvas Image
-      let chartImgUrl = "";
-      if (state.chart) {
-        try {
-          chartImgUrl = state.chart.toBase64Image("image/png", 1.0);
-        } catch (e) {
-          const chartCanvas = document.getElementById("forecastChart");
-          if (chartCanvas) chartImgUrl = chartCanvas.toDataURL("image/png");
-        }
-      }
-
-      // Preload image if available to guarantee memory paint before capture
-      if (chartImgUrl) {
-        await new Promise((resolve) => {
-          const img = new Image();
-          img.onload = resolve;
-          img.onerror = resolve;
-          img.src = chartImgUrl;
-        });
-      }
-
-      // Build numerical day table rows with explicit black/red text colors
-      let dayTableRows = "";
-      for (let i = 0; i < casesArr.length; i += 2) {
-        const d1 = labelsArr[i];
-        const c1 = casesArr[i];
-        const d2 = labelsArr[i + 1] || "";
-        const c2 = casesArr[i + 1] !== undefined ? casesArr[i + 1] : "";
-        
-        dayTableRows += `
-          <tr style="border-bottom: 1px solid #E2E8F0; color: #0F172A; background-color: ${i % 4 === 0 ? '#FFFFFF' : '#F8FAFC'};">
-            <td style="padding: 5px 8px; font-weight: bold; border-right: 1px solid #E2E8F0; color: #0F172A;">${d1}</td>
-            <td style="padding: 5px 8px; text-align: right; border-right: 2px solid #CBD5E1; color: ${c1 >= 50 ? '#DC2626' : '#0F172A'}; font-weight: ${c1 >= 50 ? 'bold' : 'normal'};">${c1} cases</td>
-            <td style="padding: 5px 8px; font-weight: bold; border-right: 1px solid #E2E8F0; color: #0F172A;">${d2}</td>
-            <td style="padding: 5px 8px; text-align: right; color: ${c2 >= 50 ? '#DC2626' : '#0F172A'}; font-weight: ${c2 >= 50 ? 'bold' : 'normal'};">${c2 !== "" ? c2 + " cases" : ""}</td>
-          </tr>
-        `;
-      }
-      
-      // Create visible printable wrapper with absolute position at top 0, left 0
-      const pdfWrapper = document.createElement("div");
-      pdfWrapper.id = "active-pdf-wrapper";
-      pdfWrapper.style.position = "absolute";
-      pdfWrapper.style.top = "0";
-      pdfWrapper.style.left = "0";
-      pdfWrapper.style.width = "780px";
-      pdfWrapper.style.background = "#FFFFFF";
-      pdfWrapper.style.color = "#0F172A";
-      pdfWrapper.style.padding = "24px";
-      pdfWrapper.style.boxSizing = "border-box";
-      pdfWrapper.style.fontFamily = "Arial, Helvetica, sans-serif";
-      pdfWrapper.style.zIndex = "99999999";
-      pdfWrapper.style.boxShadow = "0 0 20px rgba(0,0,0,0.3)";
-      
-      pdfWrapper.innerHTML = `
-        <!-- HEADER BAR -->
-        <div style="border-bottom: 3px double #1E3A8A; padding-bottom: 10px; margin-bottom: 16px; text-align: center; color: #0F172A; background: #FFFFFF;">
-          <h1 style="font-size: 18px; color: #1E3A8A; font-weight: bold; margin: 0; text-transform: uppercase;">
-            DGHS BANGLADESH • EPIDEMIC DECISION SUPPORT BULLETIN
-          </h1>
-          <h2 style="font-size: 14px; color: #DC2626; font-weight: bold; margin: 4px 0 0 0;">
-            DENGUE OUTBREAK FORECAST REPORT (${data.selected_horizon_days}-DAY OUTLOOK)
-          </h2>
-          <div style="font-size: 11px; color: #475569; margin-top: 4px;">
-            Target District: <strong style="color: #0F172A;">${data.location}</strong> | Model Engine: <strong style="color: #0F172A;">EpiST-Shield AI</strong> | Generated: <strong style="color: #0F172A;">${new Date().toLocaleString()}</strong>
-          </div>
-        </div>
-
-        <!-- 1. EXECUTIVE SUMMARY -->
-        <div style="margin-bottom: 16px; border: 1px solid #CBD5E1; padding: 12px; border-radius: 6px; background-color: #F8FAFC; color: #0F172A;">
-          <h3 style="font-size: 13px; color: #1E3A8A; margin: 0 0 8px 0; border-bottom: 1px solid #CBD5E1; padding-bottom: 4px; text-transform: uppercase;">
-            1. Executive Outbreak Summary
-          </h3>
-          <table style="width: 100%; font-size: 11px; border-collapse: collapse; color: #0F172A;">
-            <tr>
-              <td style="padding: 4px 0; color: #0F172A;"><strong style="color: #0F172A;">Outbreak Risk Tier:</strong></td>
-              <td style="padding: 4px 0;"><span style="color: ${data.summary.risk_color}; font-weight: bold; font-size: 12px;">${data.summary.outbreak_risk}</span></td>
-              <td style="padding: 4px 0; color: #0F172A;"><strong style="color: #0F172A;">Peak Risk Day:</strong></td>
-              <td style="padding: 4px 0; font-weight: bold; color: #0F172A;">${data.summary.peak_risk_day} (${data.summary.peak_cases} peak daily cases)</td>
-            </tr>
-            <tr>
-              <td style="padding: 4px 0; color: #0F172A;"><strong style="color: #0F172A;">Total Projected Cases:</strong></td>
-              <td style="padding: 4px 0; font-weight: bold; font-size: 12px; color: #1E3A8A;">${data.summary.expected_cases.toLocaleString()} cases</td>
-              <td style="padding: 4px 0; color: #0F172A;"><strong style="color: #0F172A;">Daily Average Influx:</strong></td>
-              <td style="padding: 4px 0; font-weight: bold; color: #0F172A;">${data.summary.daily_average} cases/day</td>
-            </tr>
-          </table>
-        </div>
-
-        <!-- OUTBREAK ALERT BOX -->
-        <div style="margin-bottom: 16px; padding: 10px 14px; border-radius: 6px; background-color: #FEF2F2; border: 1px solid #FCA5A5; color: #991B1B;">
-          <h3 style="font-size: 12px; color: #DC2626; margin: 0 0 4px 0; font-weight: bold;">
-            ⚠️ HIGH-RISK OUTBREAK SURGE WARNING
-          </h3>
-          <p style="font-size: 11px; color: #991B1B; margin: 0; font-weight: 500;">
-            ${data.high_risk_alert.warning_message}
-          </p>
-        </div>
-
-        <!-- 2. FORECAST CHART IMAGE -->
-        ${chartImgUrl ? `
-        <div style="margin-bottom: 16px; border: 1px solid #CBD5E1; padding: 10px; border-radius: 6px; background-color: #FFFFFF; color: #0F172A;">
-          <h3 style="font-size: 13px; color: #1E3A8A; margin: 0 0 8px 0; border-bottom: 1px solid #CBD5E1; padding-bottom: 4px; text-transform: uppercase;">
-            2. Epidemiological Forecast Trajectory Chart
-          </h3>
-          <div style="text-align: center; width: 100%;">
-            <img src="${chartImgUrl}" style="max-width: 100%; height: 210px; object-fit: contain; border-radius: 4px;" alt="Forecast Chart" />
-          </div>
-        </div>
-        ` : ''}
-
-        <!-- 3. HEALTHCARE RESOURCE ALLOCATION -->
-        <div style="margin-bottom: 16px; color: #0F172A;">
-          <h3 style="font-size: 13px; color: #1E3A8A; margin: 0 0 8px 0; border-bottom: 1px solid #CBD5E1; padding-bottom: 4px; text-transform: uppercase;">
-            3. Prescriptive Healthcare Resource Allocation
-          </h3>
-          <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 4px; color: #0F172A;">
-            <thead>
-              <tr style="background-color: #1E3A8A; color: #FFFFFF;">
-                <th style="padding: 6px 8px; text-align: left; border: 1px solid #1E3A8A; color: #FFFFFF;">Resource Item</th>
-                <th style="padding: 6px 8px; text-align: right; border: 1px solid #1E3A8A; color: #FFFFFF;">Required Quantity</th>
-                <th style="padding: 6px 8px; text-align: left; border: 1px solid #1E3A8A; color: #FFFFFF;">Standard Operational Protocol</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td style="padding: 6px 8px; border: 1px solid #CBD5E1; color: #0F172A;">🛏️ <strong style="color: #0F172A;">Hospital Isolation Beds</strong></td>
-                <td style="padding: 6px 8px; text-align: right; font-weight: bold; color: #1E3A8A; border: 1px solid #CBD5E1;">${data.healthcare_preparation.hospital_beds_needed.toLocaleString()} beds</td>
-                <td style="padding: 6px 8px; border: 1px solid #CBD5E1; color: #334155;">Reserve dedicated ward beds prior to Peak (${data.summary.peak_risk_day})</td>
-              </tr>
-              <tr style="background-color: #F8FAFC;">
-                <td style="padding: 6px 8px; border: 1px solid #CBD5E1; color: #0F172A;">🧪 <strong style="color: #0F172A;">NS1 Rapid Test Kits</strong></td>
-                <td style="padding: 6px 8px; text-align: right; font-weight: bold; color: #0D9488; border: 1px solid #CBD5E1;">${data.healthcare_preparation.test_kits_needed.toLocaleString()} kits</td>
-                <td style="padding: 6px 8px; border: 1px solid #CBD5E1; color: #334155;">Pre-position at Upazila & District Sadar Hospitals (1.8x multiplier)</td>
-              </tr>
-              <tr>
-                <td style="padding: 6px 8px; border: 1px solid #CBD5E1; color: #0F172A;">🩸 <strong style="color: #0F172A;">IV Fluid Saline Bags</strong></td>
-                <td style="padding: 6px 8px; text-align: right; font-weight: bold; color: #D97706; border: 1px solid #CBD5E1;">${data.healthcare_preparation.saline_bags_needed.toLocaleString()} bags</td>
-                <td style="padding: 6px 8px; border: 1px solid #CBD5E1; color: #334155;">Fluid rehydration emergency stock (2.5 bags/patient)</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- 4. WEEKLY DISPATCH SCHEDULE -->
-        <div style="margin-bottom: 16px; color: #0F172A;">
-          <h3 style="font-size: 13px; color: #1E3A8A; margin: 0 0 8px 0; border-bottom: 1px solid #CBD5E1; padding-bottom: 4px; text-transform: uppercase;">
-            4. Weekly Logistics Dispatch Schedule
-          </h3>
-          <table style="width: 100%; border-collapse: collapse; font-size: 11px; color: #0F172A;">
-            <thead>
-              <tr style="background-color: #1E3A8A; color: #FFFFFF;">
-                <th style="padding: 6px 8px; text-align: left; border: 1px solid #1E3A8A; color: #FFFFFF;">Timeline</th>
-                <th style="padding: 6px 8px; text-align: right; border: 1px solid #1E3A8A; color: #FFFFFF;">Projected Load</th>
-                <th style="padding: 6px 8px; text-align: left; border: 1px solid #1E3A8A; color: #FFFFFF;">Dispatch Priority & Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${data.resource_delivery_plan.map(p => `
-                <tr style="border-bottom: 1px solid #E2E8F0; color: #0F172A;">
-                  <td style="padding: 6px 8px; border: 1px solid #CBD5E1; color: #0F172A;"><strong style="color: #0F172A;">${p.week}</strong> (${p.day_range})</td>
-                  <td style="padding: 6px 8px; text-align: right; font-weight: bold; border: 1px solid #CBD5E1; color: #0F172A;">${p.expected_cases.toLocaleString()} cases</td>
-                  <td style="padding: 6px 8px; border: 1px solid #CBD5E1; color: ${p.color}; font-weight: bold;">${p.status} - ${p.description}</td>
-                </tr>
-              `).join("")}
-            </tbody>
-          </table>
-        </div>
-
-        <!-- 5. DAY-BY-DAY NUMERICAL TABLE -->
-        <div style="margin-bottom: 16px; color: #0F172A;">
-          <h3 style="font-size: 13px; color: #1E3A8A; margin: 0 0 8px 0; border-bottom: 1px solid #CBD5E1; padding-bottom: 4px; text-transform: uppercase;">
-            5. Day-by-Day Numerical Case Trajectory
-          </h3>
-          <table style="width: 100%; border-collapse: collapse; font-size: 10px; border: 1px solid #CBD5E1; color: #0F172A;">
-            <thead>
-              <tr style="background-color: #475569; color: #FFFFFF;">
-                <th style="padding: 5px 8px; text-align: left; color: #FFFFFF;">Day</th>
-                <th style="padding: 5px 8px; text-align: right; border-right: 2px solid #CBD5E1; color: #FFFFFF;">Predicted Cases</th>
-                <th style="padding: 5px 8px; text-align: left; color: #FFFFFF;">Day</th>
-                <th style="padding: 5px 8px; text-align: right; color: #FFFFFF;">Predicted Cases</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${dayTableRows}
-            </tbody>
-          </table>
-        </div>
-
-        <!-- 6. WEATHER SIMULATION & FOOTER -->
-        <div style="margin-bottom: 16px; border: 1px solid #E2E8F0; padding: 10px; border-radius: 6px; background-color: #F1F5F9; color: #0F172A;">
-          <h3 style="font-size: 12px; color: #1E3A8A; margin: 0 0 6px 0; font-weight: bold;">
-            6. Weather Simulation & Shift Analysis
-          </h3>
-          <p style="font-size: 11px; color: #334155; margin: 0;">
-            Current Meteorological Baseline: <strong style="color: #0F172A;">${state.simRainfall} mm rainfall</strong>, <strong style="color: #0F172A;">${state.simTemp} °C temp</strong>, <strong style="color: #0F172A;">${state.simHumidity} % humidity</strong>.<br/>
-            Simulated Weather Impact: Projected case surge changes from <strong style="color: #0F172A;">${data.weather_simulation_impact.normal_forecast_cases.toLocaleString()}</strong> to <strong style="color: #0F172A;">${data.weather_simulation_impact.weather_scenario_cases.toLocaleString()} cases</strong> (${data.weather_simulation_impact.expected_change_pct} shift), moving peak window to <strong style="color: #0F172A;">${data.weather_simulation_impact.peak_shift}</strong>.
-          </p>
-        </div>
-
-        <div style="margin-top: 20px; border-top: 2px solid #1E3A8A; padding-top: 10px; display: flex; justify-content: space-between; font-size: 10px; color: #64748B;">
-          <div>Directorate General of Health Services (DGHS) • Infectious Disease Surveillance</div>
-          <div>Page 1 of 1 • EpiST-Shield Decision Support System</div>
-        </div>
-      `;
-
-      document.body.appendChild(pdfWrapper);
-
-      // Wait 500ms for full layout paint & image decoding
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      const opt = {
-        margin:       [8, 8, 8, 8],
-        filename:     `DGHS_Dengue_Forecast_${data.location}_${data.selected_horizon_days}d.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { 
-          scale: 2, 
-          useCORS: true, 
-          allowTaint: true,
-          logging: false, 
-          letterRendering: true,
-          scrollY: 0,
-          scrollX: 0,
-          windowWidth: 800
-        },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
-      };
-
-      await html2pdf().set(opt).from(pdfWrapper).save();
-      pdfWrapper.remove();
-    } catch (err) {
-      console.error("PDF Export Error:", err);
-      const activeWrap = document.getElementById("active-pdf-wrapper");
-      if (activeWrap) activeWrap.remove();
-    } finally {
-      window.scrollTo(originalScrollX, originalScrollY);
-      el.pdfBtn.innerHTML = origHtml;
-      el.pdfBtn.disabled = false;
+    if (distEl) distEl.textContent = state.location;
+    if (timeEl) {
+      const now = new Date();
+      timeEl.textContent = now.toLocaleString('en-US', {
+        dateStyle: 'medium',
+        timeStyle: 'short'
+      });
     }
+
+    // Trigger browser native vector print engine (Save as PDF)
+    window.print();
   });
 }
+
 
 
 

@@ -711,11 +711,49 @@ body {
   margin-bottom: 16px;
 }
 
+.print-header {
+  display: none;
+}
+
 /* Print Optimization & PDF Export Engine Styles */
 @media print {
   @page {
     size: A4 portrait;
     margin: 10mm 10mm 10mm 10mm;
+  }
+
+  .print-header {
+    display: block !important;
+    margin-bottom: 16px !important;
+  }
+  .print-header-content {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    border-bottom: 2px solid #1E3A8A !important;
+    padding-bottom: 8px !important;
+  }
+  .print-header-title {
+    font-size: 18px !important;
+    font-weight: 800 !important;
+    color: #1E3A8A !important;
+    margin: 0 !important;
+  }
+  .print-header-sub {
+    font-size: 11px !important;
+    color: #475569 !important;
+    margin: 2px 0 0 0 !important;
+  }
+  .print-header-meta {
+    text-align: right !important;
+    font-size: 11px !important;
+    color: #1E3A8A !important;
+    font-weight: 700 !important;
+  }
+  .print-time {
+    font-size: 10px !important;
+    color: #64748B !important;
+    font-weight: normal !important;
   }
 
   html, body {

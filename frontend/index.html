@@ -9,7 +9,7 @@
   <title>Dengue Outbreak Forecast | EpiST-Shield Decision Support System</title>
   
   <!-- CSS Stylesheets -->
-  <link rel="stylesheet" href="index.css?v=2.0" />
+  <link rel="stylesheet" href="index.css?v=3.0" />
   
   <!-- Google Fonts: Outfit & Inter & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,8 +25,6 @@
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   
-  <!-- html2pdf for 1-Click PDF Export -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   
   <!-- Chart.js for Dynamic Forecast Charts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -78,6 +76,19 @@
 
   <!-- Main Container -->
   <main class="dashboard-container" id="pdf-report-container">
+    <!-- Printable Official Header (Visible on Print / PDF Export) -->
+    <div class="print-header">
+      <div class="print-header-content">
+        <div>
+          <h1 class="print-header-title">DGHS DENGUE OUTBREAK FORECAST REPORT</h1>
+          <p class="print-header-sub">EpiST-Shield Decision Support System • Government of Bangladesh</p>
+        </div>
+        <div class="print-header-meta">
+          <div>Target District: <strong id="print-district-name">Mymensingh</strong></div>
+          <div class="print-time">Generated: <span id="print-report-time"></span></div>
+        </div>
+      </div>
+    </div>
     
     <!-- 📅 SELECT FORECAST PERIOD BAR -->
     <section class="period-selector-section glass-card">
@@ -333,6 +344,6 @@
   </div>
 
   <!-- App Logic -->
-  <script src="app.js?v=2.0"></script>
+  <script src="app.js?v=3.0"></script>
 </body>
 </html>
