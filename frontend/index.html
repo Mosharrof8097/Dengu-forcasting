@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dengue Outbreak Forecast | EpiST-Shield Decision Support System</title>
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="index.css" />
+  
+  <!-- Google Fonts: Outfit & Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet CSS for Maps -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <!-- html2pdf for 1-Click PDF Export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  
+  <!-- Chart.js for Dynamic Forecast Charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- Top Header Section -->
+  <header class="header-bar">
+    <div class="brand-title">
+      <span class="brand-icon">🦟</span>
+      <div>
+        <h1 id="txt-app-title">DENGUE OUTBREAK FORECAST</h1>
+        <div class="location-picker-wrap">
+          <label for="location-select" class="location-label"><i class="fa-solid fa-location-dot"></i> Location:</label>
+          <select id="location-select" class="location-select">
+            <option value="Mymensingh" selected>Mymensingh</option>
+            <option value="Dhaka">Dhaka</option>
+            <option value="Chittagong">Chittagong</option>
+            <option value="Gazipur">Gazipur</option>
+            <option value="Narayanganj">Narayanganj</option>
+            <option value="Khulna">Khulna</option>
+            <option value="Barishal">Barishal</option>
+            <option value="Rajshahi">Rajshahi</option>
+            <option value="Sylhet">Sylhet</option>
+            <option value="Cumilla">Cumilla</option>
+            <option value="Faridpur">Faridpur</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Header Actions -->
+    <div class="header-controls">
+      <div class="last-updated-badge" id="last-updated-badge">
+        <i class="fa-regular fa-clock"></i> Last Updated: <span id="txt-last-updated">1:05 AM</span>
+      </div>
+
+      <!-- Theme Switcher -->
+      <button class="btn-icon" id="theme-toggle" title="Toggle Dark/Light Mode">
+        <i class="fa-solid fa-moon"></i> <span id="theme-text">Dark Mode</span>
+      </button>
+
+      <!-- PDF Download Button -->
+      <button class="btn-pdf" id="pdf-export-btn" title="Download Official DGHS Forecast Report">
+        <i class="fa-solid fa-file-pdf"></i> <span>Download PDF Report</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="dashboard-container" id="pdf-report-container">
+    
+    <!-- 📅 SELECT FORECAST PERIOD BAR -->
+    <section class="period-selector-section glass-card">
+      <div class="period-header">
+        <h2 class="section-title"><i class="fa-solid fa-calendar-days"></i> SELECT FORECAST PERIOD</h2>
+        <span class="period-hint">All charts, summaries, and PDF reports dynamically sync to this selected horizon.</span>
+      </div>
+
+      <div class="period-tabs" id="period-tabs">
+        <button class="period-btn" data-days="7">7 Days</button>
+        <button class="period-btn" data-days="14">14 Days</button>
+        <button class="period-btn" data-days="21">21 Days</button>
+        <button class="period-btn active" data-days="30">30 Days</button>
+      </div>
+    </section>
+
+    <!-- 🚨 CURRENT OUTBREAK SUMMARY (4 Big Cards) -->
+    <section class="summary-section">
+      <div class="summary-grid">
+        
+        <!-- Card 1: Outbreak Risk -->
+        <div class="summary-card glass-card card-risk">
+          <div class="card-header">
+            <span class="card-icon">🔴</span>
+            <span class="card-label">OUTBREAK RISK</span>
+          </div>
+          <div class="card-value risk-badge-high" id="summary-risk-val">HIGH</div>
+          <div class="card-subtext" id="summary-risk-sub">Critical Surge Warning</div>
+        </div>
+
+        <!-- Card 2: Expected Cases -->
+        <div class="summary-card glass-card">
+          <div class="card-header">
+            <span class="card-icon">📊</span>
+            <span class="card-label">EXPECTED CASES</span>
+          </div>
+          <div class="card-value" id="summary-cases-val">1,850</div>
+          <div class="card-subtext" id="summary-cases-sub">Next 30 Days</div>
+        </div>
+
+        <!-- Card 3: Peak Risk -->
+        <div class="summary-card glass-card">
+          <div class="card-header">
+            <span class="card-icon">⚡</span>
+            <span class="card-label">PEAK RISK</span>
+          </div>
+          <div class="card-value" id="summary-peak-val">Day 18</div>
+          <div class="card-subtext">Highest Cases Projected</div>
+        </div>
+
+        <!-- Card 4: Daily Average -->
+        <div class="summary-card glass-card">
+          <div class="card-header">
+            <span class="card-icon">📅</span>
+            <span class="card-label">DAILY AVERAGE</span>
+          </div>
+          <div class="card-value" id="summary-daily-val">62</div>
+          <div class="card-subtext">Cases / Day</div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Main Content Split: Chart & Map + Side Panel -->
+    <div class="main-content-grid">
+      
+      <!-- Left Column: Forecast Chart & Alert + Geospatial Map -->
+      <div class="content-left">
+        
+        <!-- 📈 DENGUE FORECAST CHART -->
+        <div class="glass-card chart-card-wrapper">
+          <div class="card-title-row">
+            <div>
+              <h2 class="section-title"><i class="fa-solid fa-chart-line"></i> DENGUE FORECAST</h2>
+              <p class="section-subtitle">Expected Number of Cases Over Time (<span id="chart-location-name">Mymensingh</span>)</p>
+            </div>
+            <div class="chart-legend-row">
+              <span class="legend-badge legend-forecast"><i class="fa-solid fa-minus"></i> Expected Trajectory</span>
+              <span class="legend-badge legend-thresh"><i class="fa-solid fa-ellipsis"></i> High-Risk Level (50 cases/day)</span>
+            </div>
+          </div>
+
+          <div class="chart-container">
+            <canvas id="forecastChart"></canvas>
+          </div>
+
+          <!-- ⚠ HIGH-RISK PERIOD ALERT BOX -->
+          <div class="alert-box-warning" id="high-risk-alert-box">
+            <div class="alert-box-header">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              <span>HIGH-RISK PERIOD ALERT</span>
+            </div>
+            <p class="alert-box-body" id="high-risk-alert-text">
+              Higher dengue activity is expected from <strong>Day 15 to Day 23</strong>.<br />
+              Peak risk is expected on <strong>Day 18</strong>.
+            </p>
+          </div>
+        </div>
+
+        <!-- 🗺️ GEOSPATIAL MAP CARD -->
+        <div class="glass-card map-card-wrapper">
+          <div class="card-title-row">
+            <div>
+              <h2 class="section-title"><i class="fa-solid fa-map-location-dot"></i> GEOSPATIAL OUTBREAK HEATMAP</h2>
+              <p class="section-subtitle">Real-time risk mapping across 11 Focal Districts in Bangladesh</p>
+            </div>
+            <span class="live-pulse"><i class="fa-solid fa-circle-dot fa-pulse"></i> Live AI Sync</span>
+          </div>
+
+          <div class="map-card-body">
+            <div id="map"></div>
+            <div class="map-legend">
+              <div class="legend-title">Risk Tier</div>
+              <div class="legend-item"><span class="color-dot dot-high"></span> High Surge (>50/day)</div>
+              <div class="legend-item"><span class="color-dot dot-mod"></span> Warning (20-50/day)</div>
+              <div class="legend-item"><span class="color-dot dot-low"></span> Low/Normal (<20/day)</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Healthcare Preparation, Delivery Plan & Weather Sim -->
+      <div class="content-right">
+        
+        <!-- 🏥 HEALTHCARE PREPARATION -->
+        <div class="glass-card section-card">
+          <h2 class="section-title"><i class="fa-solid fa-hospital"></i> HEALTHCARE PREPARATION</h2>
+          <p class="section-subtitle">Recommended medical supplies based on selected forecast period</p>
+
+          <div class="resource-cards-grid">
+            <div class="resource-card">
+              <div class="res-icon">🛏</div>
+              <div class="res-details">
+                <span class="res-title">HOSPITAL BEDS NEEDED</span>
+                <span class="res-val" id="res-beds-val">185</span>
+              </div>
+            </div>
+
+            <div class="resource-card">
+              <div class="res-icon">🧪</div>
+              <div class="res-details">
+                <span class="res-title">TEST KITS NEEDED</span>
+                <span class="res-val" id="res-kits-val">3,330</span>
+              </div>
+            </div>
+
+            <div class="resource-card">
+              <div class="res-icon">🩸</div>
+              <div class="res-details">
+                <span class="res-title">SALINE BAGS NEEDED</span>
+                <span class="res-val" id="res-saline-val">4,625</span>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn-outline" id="btn-view-resource-modal">
+            <i class="fa-solid fa-circle-info"></i> View Detailed Resource Analysis
+          </button>
+        </div>
+
+        <!-- 🚚 RESOURCE DELIVERY PLAN -->
+        <div class="glass-card section-card">
+          <h2 class="section-title"><i class="fa-solid fa-truck-ramp-box"></i> RESOURCE DELIVERY PLAN</h2>
+          <p class="section-subtitle">Weekly priority dispatch schedule for emergency response</p>
+
+          <div class="delivery-plan-list" id="delivery-plan-list">
+            <!-- Populated dynamically -->
+          </div>
+
+          <button class="btn-outline" id="btn-view-dispatch-modal" style="margin-top: 12px;">
+            <i class="fa-solid fa-list-check"></i> View Detailed Dispatch Plan
+          </button>
+        </div>
+
+        <!-- 🌦 WHAT-IF WEATHER SIMULATION -->
+        <div class="glass-card section-card sim-section">
+          <h2 class="section-title"><i class="fa-solid fa-cloud-sun-rain"></i> WHAT-IF WEATHER SIMULATION</h2>
+          <p class="section-subtitle">See how weather changes may affect the forecast.</p>
+
+          <div class="sim-sliders-group">
+            <!-- Rainfall -->
+            <div class="sim-slider-item">
+              <div class="sim-slider-label">
+                <span>🌧 Rainfall</span>
+                <span class="sim-val" id="sim-rainfall-val">85.4 mm</span>
+              </div>
+              <input type="range" id="sim-rainfall" min="0" max="250" value="85.4" step="1" />
+            </div>
+
+            <!-- Temperature -->
+            <div class="sim-slider-item">
+              <div class="sim-slider-label">
+                <span>🌡 Temperature</span>
+                <span class="sim-val" id="sim-temp-val">29.5 °C</span>
+              </div>
+              <input type="range" id="sim-temp" min="15" max="42" value="29.5" step="0.5" />
+            </div>
+
+            <!-- Humidity -->
+            <div class="sim-slider-item">
+              <div class="sim-slider-label">
+                <span>💧 Humidity</span>
+                <span class="sim-val" id="sim-humidity-val">82.0 %</span>
+              </div>
+              <input type="range" id="sim-humidity" min="30" max="100" value="82.0" step="1" />
+            </div>
+          </div>
+
+          <button class="btn-primary" id="btn-update-forecast" style="width: 100%; margin-top: 14px;">
+            <i class="fa-solid fa-bolt"></i> Update Forecast
+          </button>
+
+          <!-- Forecast Impact Box -->
+          <div class="sim-result-box" id="sim-result-box">
+            <div class="sim-result-title">FORECAST IMPACT</div>
+            <div class="sim-result-row">
+              <span>Normal Forecast:</span>
+              <strong id="sim-norm-val">1,850 cases</strong>
+            </div>
+            <div class="sim-result-row">
+              <span>Weather Scenario:</span>
+              <strong id="sim-weather-val">2,140 cases</strong>
+            </div>
+            <div class="sim-result-row highlight-row">
+              <span>Expected Change:</span>
+              <strong style="color: var(--color-risk-high);" id="sim-change-val">+15.7%</strong>
+            </div>
+            <div class="sim-result-row">
+              <span>Peak Risk Shift:</span>
+              <strong id="sim-shift-val">Day 18 → Day 16</strong>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Detailed Analysis Modal -->
+  <div id="detail-modal" class="modal-overlay">
+    <div class="modal-card glass-card">
+      <div class="modal-header">
+        <h2 id="modal-title"><i class="fa-solid fa-circle-info"></i> Detailed Analysis</h2>
+        <button class="btn-icon" id="btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body" id="modal-body">
+        <!-- Populated dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- App Logic -->
+  <script src="app.js"></script>
+</body>
+</html>
