@@ -9,3 +9,4 @@ venv/
 ENV/
 *.log
 .DS_Store
+.~lock.*
