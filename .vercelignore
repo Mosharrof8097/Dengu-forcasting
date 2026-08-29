@@ -1,0 +1,17 @@
+# Ignore heavy paper files, manuscripts, images, and build scripts from Vercel deployment
+*.docx
+*.png
+*.jpg
+*.jpeg
+*.pdf
+*.npz
+*.csv
+*.json
+!vercel.json
+05_Paper_Figures/
+benchmarks/
+scripts/
+paper_draft/
+*.md
+!README.md
+build_softwarex_formatted_paper.py
