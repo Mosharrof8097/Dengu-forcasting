@@ -190,8 +190,8 @@ def api_health():
 def get_districts():
     return {"districts": DISTRICTS_11}
 
-def run_model_inference(district: str, rainfall: float, temp: float, humidity: float, lag7: float, lag14: float, lag21: float) -> float:
-    """Helper to run model prediction for single base day"""
+def run_model_inference(district: str, rainfall: float, temp: float, humidity: float, lag7: float, lag14: float, lag21: float):
+    """Helper to run model prediction for single base day. Returns (pred_value, is_fallback)"""
     if HAS_TF and model is not None:
         try:
             mean_bio, std_bio = np.array([25.4, 22.1, 18.8]), np.array([32.5, 30.1, 27.4])
@@ -213,12 +213,13 @@ def run_model_inference(district: str, rainfall: float, temp: float, humidity: f
             raw_pred = float(model.predict([bio_seq, weather_seq], verbose=0)[0][0])
             base_surge = max(0.0, raw_pred)
             if base_surge > 0:
-                return base_surge
+                return base_surge, False
         except Exception:
             pass
             
     base = DISTRICT_BASE_CASES.get(district, 40.0)
-    return base + (rainfall / 8.5) + (temp - 25.0) * 1.2 + (lag7 * 0.4)
+    fallback_val = base + (rainfall / 8.5) + (temp - 25.0) * 1.2 + (lag7 * 0.4)
+    return fallback_val, True
 
 
 @app.post("/api/forecast/multi-horizon")
@@ -237,10 +238,11 @@ def generate_multi_horizon_forecast(req: MultiHorizonRequest):
     n_days = req.horizon_days if req.horizon_days in [7, 14, 21, 30] else 30
     
     # Base daily prediction seed
-    base_daily = run_model_inference(
+    base_daily, is_fallback = run_model_inference(
         req.district, req.rainfall_7d, req.temperature_7d, req.humidity_7d,
         req.cases_lag_7, req.cases_lag_14, req.cases_lag_21
     )
+    forecast_source = "backend_mathematical_fallback" if is_fallback else "epist_former"
     
     if req.vector_control_active:
         base_daily *= 0.655  # -34.5% reduction
@@ -359,6 +361,8 @@ def generate_multi_horizon_forecast(req: MultiHorizonRequest):
     return {
         "location": req.district,
         "selected_horizon_days": n_days,
+        "forecast_source": forecast_source,
+        "fallback_active": is_fallback,
         "summary": {
             "outbreak_risk": risk_level,
             "risk_color": risk_color,
@@ -396,10 +400,11 @@ def generate_multi_horizon_forecast(req: MultiHorizonRequest):
 @app.post("/api/predict")
 def predict_district_outbreak(data: WeatherInput, vector_control_active: Optional[bool] = False):
     start_time = time.time()
-    base_pred = run_model_inference(
+    base_pred, is_fallback = run_model_inference(
         data.district, data.rainfall_7d, data.temperature_7d, data.humidity_7d,
         data.cases_lag_7, data.cases_lag_14, data.cases_lag_21
     )
+    forecast_source = "backend_mathematical_fallback" if is_fallback else "epist_former"
     if vector_control_active:
         base_pred *= 0.655
     latency_ms = round((time.time() - start_time) * 1000, 2)
@@ -416,6 +421,8 @@ def predict_district_outbreak(data: WeatherInput, vector_control_active: Optiona
         
     return {
         "district": data.district,
+        "forecast_source": forecast_source,
+        "fallback_active": is_fallback,
         "predicted_cases_daily": round(base_pred, 2),
         "predicted_cases_weekly": round(base_pred * 7, 1),
         "risk_level": risk_level,

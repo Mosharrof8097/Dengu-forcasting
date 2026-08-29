@@ -179,6 +179,55 @@ body {
   gap: 6px;
 }
 
+/* Forecast Source Badges */
+.forecast-source-badge {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all var(--transition-fast);
+}
+
+.forecast-source-badge.badge-live {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10B981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.forecast-source-badge.badge-backend-fallback {
+  background: rgba(245, 158, 11, 0.12);
+  color: #F59E0B;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.forecast-source-badge.badge-client-fallback {
+  background: rgba(239, 68, 68, 0.12);
+  color: #EF4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* Fallback Warning Alert Box */
+.alert-box-fallback {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #D97706;
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: var(--space-xs);
+}
+
+[data-theme="dark"] .alert-box-fallback {
+  background: rgba(245, 158, 11, 0.15);
+  color: #FBBF24;
+}
+
 .btn-icon {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);

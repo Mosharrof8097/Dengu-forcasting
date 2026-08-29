@@ -351,6 +351,8 @@ function generateFallbackForecastData() {
   return {
     location: state.location,
     selected_horizon_days: n,
+    forecast_source: "client_mathematical_fallback",
+    fallback_active: true,
     summary: {
       outbreak_risk: maxCase >= 50 ? "HIGH" : (maxCase >= 25 ? "MODERATE" : "LOW"),
       risk_color: maxCase >= 50 ? "#EF4444" : (maxCase >= 25 ? "#F59E0B" : "#10B981"),
@@ -387,8 +389,51 @@ function generateFallbackForecastData() {
   };
 }
 
+// Update UI badges for Forecast Source Transparency
+function updateForecastSourceUI(source, fallbackActive) {
+  const badge = document.getElementById("forecast-source-badge");
+  const icon = document.getElementById("icon-source-status");
+  const label = document.getElementById("txt-source-label");
+  const banner = document.getElementById("fallback-warning-banner");
+  const printSource = document.getElementById("print-forecast-source");
+
+  if (!badge) return;
+
+  badge.classList.remove("badge-live", "badge-backend-fallback", "badge-client-fallback");
+
+  if (source === "epist_former" && !fallbackActive) {
+    badge.classList.add("badge-live");
+    if (icon) icon.className = "fa-solid fa-circle-check";
+    if (label) label.textContent = "EpiST-Former Live Model";
+    if (banner) banner.style.display = "none";
+    if (printSource) printSource.textContent = "EpiST-Former Live Model";
+  } else if (source === "backend_mathematical_fallback") {
+    badge.classList.add("badge-backend-fallback");
+    if (icon) icon.className = "fa-solid fa-triangle-exclamation";
+    if (label) label.textContent = "Backend Mathematical Fallback";
+    if (banner) {
+      banner.style.display = "flex";
+      banner.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> <span><strong>Backend Fallback Active:</strong> Live EpiST-Former model was unavailable. Projections generated via backend mathematical formulas. Resource recommendations are unvalidated estimates.</span>`;
+    }
+    if (printSource) printSource.textContent = "Backend Mathematical Fallback";
+  } else {
+    // client_mathematical_fallback
+    badge.classList.add("badge-client-fallback");
+    if (icon) icon.className = "fa-solid fa-triangle-exclamation";
+    if (label) label.textContent = "Offline Fallback Mode";
+    if (banner) {
+      banner.style.display = "flex";
+      banner.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> <span><strong>Client-Side Offline Fallback:</strong> Network/API connection unavailable. Displaying locally generated synthetic continuity estimates. Resource dispatch recommendations are unvalidated.</span>`;
+    }
+    if (printSource) printSource.textContent = "Client-Side Offline Mathematical Fallback";
+  }
+}
+
 // Render Dashboard Elements
 function renderDashboard(data) {
+  // 0. Update Forecast Source UI
+  updateForecastSourceUI(data.forecast_source || "epist_former", data.fallback_active || false);
+
   // 1. Location & Title Sync
   el.chartLocationName.textContent = data.location;
   
@@ -603,9 +648,20 @@ function initPdfExport() {
     
     // Update printable header metadata
     const distEl = document.getElementById("print-district-name");
+    const sourceEl = document.getElementById("print-forecast-source");
     const timeEl = document.getElementById("print-report-time");
     
     if (distEl) distEl.textContent = state.location;
+    if (sourceEl && state.forecastData) {
+      const src = state.forecastData.forecast_source;
+      if (src === "epist_former" && !state.forecastData.fallback_active) {
+        sourceEl.textContent = "EpiST-Former Live Model";
+      } else if (src === "backend_mathematical_fallback") {
+        sourceEl.textContent = "Backend Mathematical Fallback";
+      } else {
+        sourceEl.textContent = "Client-Side Offline Mathematical Fallback";
+      }
+    }
     if (timeEl) {
       const now = new Date();
       timeEl.textContent = now.toLocaleString('en-US', {

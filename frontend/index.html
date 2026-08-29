@@ -58,6 +58,10 @@
 
     <!-- Header Actions -->
     <div class="header-controls">
+      <div class="forecast-source-badge badge-live" id="forecast-source-badge" title="Forecast Engine Operational Status">
+        <i class="fa-solid fa-circle-check" id="icon-source-status"></i> <span id="txt-source-label">EpiST-Former Live Model</span>
+      </div>
+
       <div class="last-updated-badge" id="last-updated-badge">
         <i class="fa-regular fa-clock"></i> Last Updated: <span id="txt-last-updated">1:05 AM</span>
       </div>
@@ -85,6 +89,7 @@
         </div>
         <div class="print-header-meta">
           <div>Target District: <strong id="print-district-name">Mymensingh</strong></div>
+          <div>Forecast Source: <strong id="print-forecast-source">EpiST-Former Live Model</strong></div>
           <div class="print-time">Generated: <span id="print-report-time"></span></div>
         </div>
       </div>
@@ -214,6 +219,12 @@
       <!-- Right Column: Healthcare Preparation, Delivery Plan & Weather Sim -->
       <div class="content-right">
         
+        <!-- Fallback Decision Safety Warning Banner -->
+        <div id="fallback-warning-banner" class="alert-box-fallback" style="display: none;">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span><strong>Resource Disclaimer:</strong> Estimates shown in this mode are continuity estimates derived from fallback data and must not be interpreted as validated EpiST-Former recommendations.</span>
+        </div>
+
         <!-- 🏥 HEALTHCARE PREPARATION -->
         <div class="glass-card section-card">
           <h2 class="section-title"><i class="fa-solid fa-hospital"></i> HEALTHCARE PREPARATION</h2>

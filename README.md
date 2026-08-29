@@ -5,7 +5,7 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688.svg)](https://fastapi.tiangolo.com/)
 [![TensorFlow](https://img.shields.io/badge/TensorFlow-2.15+-FF6F00.svg)](https://tensorflow.org/)
 [![System Usability Score](https://img.shields.io/badge/SUS%20Score-88.4%2F100%20(Grade%20A%2B)-brightgreen.svg)]()
-[![Core Latency p95](https://img.shields.io/badge/Core%20Latency%20p95-0.021%20ms-success.svg)]()
+[![Core Latency p95](https://img.shields.io/badge/Core%20Latency%20p95-0.027%20ms-success.svg)]()
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel%20Deployment-000000.svg?logo=vercel)](https://dengu-forcasting.vercel.app/)
 
 ---
@@ -17,10 +17,11 @@
 During explosive monsoonal outbreaks, public health authorities face critical shortages of hospital isolation beds, intravenous (IV) saline fluid bags, and rapid diagnostic NS1 test kits. EpiST-Shield bridges the operational gap between deep learning case forecasting and real-world healthcare execution by offering:
 
 1. **Multi-Horizon Prospective Forecasting:** 7-, 14-, 21-, and 30-day district-level daily case projections across 11 focal endemic districts in Bangladesh.
-2. **Prescriptive Logistics Planning:** Automated calculation of required hospital isolation beds ($3.0 \times \text{peak daily cases}$), NS1 rapid test kits ($1.8 \times \text{total cases}$), and IV saline fluid bags ($2.5 \times \text{total cases}$).
+2. **Prescriptive Logistics Planning:** Automated calculation of required hospital isolation beds ($3.0 \times \text{peak daily cases}$), NS1 rapid test kits ($1.8 \times \text{total cases}$), and IV saline fluid bags ($2.5 \times \text{total cases}$). *(Note: Multipliers represent illustrative baseline parameters derived from expert consensus and require local hospital calibration).*
 3. **Prioritized Weekly Supply Schedules:** A 4-week prioritized dispatch schedule categorized by urgency status.
 4. **Interactive "What-If" Weather Simulator:** Real-time stress-testing of forecast curves under user-defined rainfall (mm), temperature (°C), and relative humidity (%) variations.
 5. **Executive PDF Bulletin Exporter:** One-click client-side generation of timestamped, print-optimized advisory bulletins for Ministry reporting.
+6. **Decision Safety & Forecast Source Transparency:** Dynamic status badges distinguishing primary `EpiST-Former` deep-learning forecasts from degraded mathematical or offline fallback estimates (`epist_former`, `backend_mathematical_fallback`, `client_mathematical_fallback`).
 
 ---
 
@@ -99,7 +100,7 @@ The main interface presents a unified command center for public health decision-
 
 ---
 
-### 2. Interactive "What-If" Meteorological Simulator
+## 2. Interactive "What-If" Meteorological Simulator
 Allows health policy makers to stress-test forecast curves under extreme monsoonal climate shifts.
 
 ![Weather Simulator UI](05_Paper_Figures/fig3_weather_simulator_ui.png)
@@ -129,11 +130,12 @@ Benchmarked across 1,000 continuous execution cycles on a standard CPU compute n
 | Performance Metric | Measured Benchmark Value | Test Specification / Environment |
 | :--- | :---: | :--- |
 | **Mean Core Inference Latency** | `0.018 ms` | Standard CPU Compute Node (1,000 cycles) |
-| **p90 Core Inference Latency** | `0.020 ms` | Standard CPU Compute Node (1,000 cycles) |
-| **p95 Core Inference Latency** | `0.021 ms` | Standard CPU Compute Node (1,000 cycles) |
-| **p99 Core Inference Latency** | `0.035 ms` | Standard CPU Compute Node (1,000 cycles) |
+| **p50 (Median) Core Inference Latency** | `0.018 ms` | Standard CPU Compute Node (1,000 cycles) |
+| **p90 Core Inference Latency** | `0.025 ms` | Standard CPU Compute Node (1,000 cycles) |
+| **p95 Core Inference Latency** | `0.027 ms` | Standard CPU Compute Node (1,000 cycles) |
+| **p99 Core Inference Latency** | `0.032 ms` | Standard CPU Compute Node (1,000 cycles) |
 | **Peak Throughput** | `>48,500 req/sec` | FastAPI + Uvicorn ASGI Server |
-| **System Usability Scale (SUS)** | **88.4 / 100** (Grade A+) | Field Usability Audit with 15 Health Experts |
+| **System Usability Scale (SUS)** | **88.4 / 100** (Grade A+) | Field Usability Audit with 15 Health Experts |dit with 15 Health Experts |
 
 ---
 
@@ -220,6 +222,28 @@ python3 main.py
 | `POST /api/forecast/multi-horizon` | `POST` | Master multi-horizon (7d, 14d, 21d, 30d) forecast & supply allocation endpoint. |
 | `POST /api/predict` | `POST` | Base single-day risk prediction endpoint. |
 
+### Representative API Listing (`POST /api/forecast/multi-horizon`)
+
+```json
+// Sample API Request
+{
+  "district": "Mymensingh",
+  "horizon_days": 30
+}
+
+// Sample API Response (200 OK)
+{
+  "status": "success",
+  "district": "Mymensingh",
+  "forecast_horizon_days": 30,
+  "forecast_source": "epist_former",
+  "fallback_active": false,
+  "risk_level": "HIGH",
+  "predicted_cumulative_cases": 1722,
+  "peak_day": 18
+}
+```
+
 ---
 
 ## 📋 Code Metadata Table (SoftwareX Requirement)
@@ -232,7 +256,7 @@ python3 main.py
 | **C4** | Code versioning system used | `git` |
 | **C5** | Software languages, tools and services used | Python 3.12, FastAPI, TensorFlow/Keras 3.x, HTML5, Vanilla CSS3, JavaScript (ES6+), Leaflet.js, Vercel |
 | **C6** | Compilation requirements & dependencies | Python 3.10+; see `requirements.txt` |
-| **C7** | Link to developer documentation | [https://dengu-forcasting.vercel.app/](https://dengu-forcasting.vercel.app/) |
+| **C7** | Link to developer documentation | [https://github.com/Mosharrof8097/Dengu-forcasting#readme](https://github.com/Mosharrof8097/Dengu-forcasting#readme) |
 | **C8** | Support email for questions | `mdmosharrofhossain455@gmail.com` |
 
 ---

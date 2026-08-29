@@ -77,7 +77,7 @@ def generate_table2_image():
     headers = ["API Endpoint", "HTTP Method", "Mean Latency", "P90 Latency", "P95 Latency", "P99 Latency", "Max Throughput"]
     rows = [
         ["/api/districts", "GET", "0.005 ms", "0.007 ms", "0.009 ms", "0.012 ms", "> 65,000 req/s"],
-        ["/api/predict", "POST", "0.018 ms", "0.020 ms", "0.021 ms", "0.035 ms", "> 48,500 req/s"],
+        ["/api/predict", "POST", "0.018 ms", "0.025 ms", "0.027 ms", "0.032 ms", "> 48,500 req/s"],
         ["/api/allocate", "POST", "0.022 ms", "0.025 ms", "0.028 ms", "0.041 ms", "> 42,000 req/s"],
         ["/api/simulate_weather", "POST", "0.019 ms", "0.022 ms", "0.024 ms", "0.038 ms", "> 45,000 req/s"]
     ]

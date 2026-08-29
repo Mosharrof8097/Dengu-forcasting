@@ -37,14 +37,22 @@ def generate_fig6_executive_bulletin():
     rect_header = patches.Rectangle((0.02, 0.88), 0.96, 0.10, transform=ax.transAxes, color='#1E3A8A')
     ax.add_patch(rect_header)
 
-    ax.text(0.5, 0.94, "DIRECTORATE GENERAL OF HEALTH SERVICES (DGHS)", fontsize=13, fontweight='bold', color='#FFFFFF', ha='center', va='center', transform=ax.transAxes)
-    ax.text(0.5, 0.90, "EpiST-Shield Real-Time Dengue Outbreak Prescriptive Bulletin", fontsize=11, fontweight='bold', color='#6EE7B7', ha='center', va='center', transform=ax.transAxes)
+    ax.text(0.5, 0.94, "DISTRICT PUBLIC HEALTH SURVEILLANCE CELL", fontsize=13, fontweight='bold', color='#FFFFFF', ha='center', va='center', transform=ax.transAxes)
+    ax.text(0.5, 0.90, "EpiST-Shield Real-Time Dengue Outbreak Illustrative Bulletin", fontsize=11, fontweight='bold', color='#6EE7B7', ha='center', va='center', transform=ax.transAxes)
+
+    # MANDATORY DISCLAIMER WATERMARK / BANNER (Reviewer Comment 15 Resolution)
+    rect_disc = patches.Rectangle((0.02, 0.965), 0.96, 0.025, transform=ax.transAxes, color='#DC2626')
+    ax.add_patch(rect_disc)
+    ax.text(0.5, 0.977, "SAMPLE OUTPUT — FOR ILLUSTRATION ONLY | NOT AN OFFICIAL DGHS DOCUMENT", fontsize=8.5, fontweight='bold', color='#FFFFFF', ha='center', va='center', transform=ax.transAxes)
+
+    # Diagonal Semi-Transparent Watermark Across Page
+    ax.text(0.5, 0.50, "SAMPLE OUTPUT — FOR ILLUSTRATION ONLY", fontsize=22, fontweight='bold', color='#DC2626', alpha=0.15, rotation=30, ha='center', va='center', transform=ax.transAxes)
 
     # Metadata Banner
     ax.text(0.05, 0.85, "Date: 26 July 2026", fontsize=9.5, fontweight='bold', color='#334155', transform=ax.transAxes)
     ax.text(0.55, 0.85, "Issued By: Public Health AI Intelligence Cell", fontsize=9.5, fontweight='bold', color='#334155', transform=ax.transAxes)
     ax.text(0.05, 0.83, "Surveillance Horizon: 21 Days", fontsize=9.5, color='#64748B', transform=ax.transAxes)
-    ax.text(0.55, 0.83, "Model Latency (p95): 0.02 ms (Grade A+ Certified)", fontsize=9.5, color='#059669', transform=ax.transAxes)
+    ax.text(0.55, 0.83, "Model Latency (p95): 0.027 ms (Verified)", fontsize=9.5, color='#059669', transform=ax.transAxes)
 
     ax.axhline(0.81, color='#CBD5E1', linewidth=1)
 
@@ -102,9 +110,9 @@ def generate_fig6_executive_bulletin():
 
     ax.text(0.10, 0.17, "Prepared By: EpiST-Shield Automated Decision Engine", fontsize=8.5, fontweight='bold', transform=ax.transAxes)
     ax.text(0.10, 0.14, "System Usability Audit Score: 88.4 / 100 (Grade A+ Excellent)", fontsize=8.5, color='#059669', transform=ax.transAxes)
-    ax.text(0.10, 0.11, "Repository Reference: open-source MIT License", fontsize=8.5, color='#64748B', transform=ax.transAxes)
+    ax.text(0.10, 0.11, "Repository Reference: Open-Source MIT License", fontsize=8.5, color='#64748B', transform=ax.transAxes)
 
-    ax.text(0.65, 0.10, "___________________________\nDirector General, Health Services\nGovernment of Bangladesh", fontsize=8.5, fontweight='bold', ha='center', transform=ax.transAxes)
+    ax.text(0.65, 0.10, "___________________________\nAuthorized Public Health Official\n(Illustrative Demonstration Sign-Off)", fontsize=8.5, fontweight='bold', ha='center', transform=ax.transAxes)
 
     plt.tight_layout()
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
