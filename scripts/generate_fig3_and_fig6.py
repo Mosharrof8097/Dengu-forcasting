@@ -69,29 +69,35 @@ def generate_fig6_executive_bulletin():
         ["Rajshahi", "LOW / NORMAL", "12.4", "86.8", "STANDARD MONITORING"]
     ]
     
-    table = ax.table(cellText=table_data, loc='center', bbox=[0.05, 0.54, 0.90, 0.22])
+    col_widths = [0.15, 0.20, 0.20, 0.20, 0.25]
+    table = ax.table(cellText=table_data, colWidths=col_widths, loc='center', bbox=[0.05, 0.53, 0.90, 0.23])
     table.auto_set_font_size(False)
-    table.set_fontsize(8.5)
+    table.set_fontsize(8.0)
     
-    # Style Table Header
+    # Style Table Header and Cells
     for (i, j), cell in table.get_celld().items():
+        cell.set_edgecolor('#CBD5E1')
+        cell.set_linewidth(0.8)
         if i == 0:
             cell.set_facecolor('#1E3A8A')
             cell.get_text().set_color('white')
             cell.get_text().set_weight('bold')
-        elif j == 1:
-            if "HIGH" in cell.get_text().get_text():
-                cell.set_facecolor('#FEE2E2')
-                cell.get_text().set_color('#B91C1C')
-                cell.get_text().set_weight('bold')
-            elif "WARNING" in cell.get_text().get_text():
-                cell.set_facecolor('#FEF3C7')
-                cell.get_text().set_color('#D97706')
+            cell.get_text().set_ha('center')
+        else:
+            cell.get_text().set_ha('center')
+            if j == 1:
+                if "HIGH" in cell.get_text().get_text():
+                    cell.set_facecolor('#FEE2E2')
+                    cell.get_text().set_color('#B91C1C')
+                    cell.get_text().set_weight('bold')
+                elif "WARNING" in cell.get_text().get_text():
+                    cell.set_facecolor('#FEF3C7')
+                    cell.get_text().set_color('#D97706')
 
     # Section 2: Prescriptive Resource Allocation Directives
-    ax.text(0.05, 0.49, "2. Prescriptive Resource Allocation Directives (CMDP / PPO Policy)", fontsize=11, fontweight='bold', color='#1E3A8A', transform=ax.transAxes)
+    ax.text(0.05, 0.48, "2. Prescriptive Resource Allocation Directives (Rule-Based Multipliers)", fontsize=11, fontweight='bold', color='#1E3A8A', transform=ax.transAxes)
 
-    rect_res = patches.Rectangle((0.05, 0.28), 0.90, 0.19, transform=ax.transAxes, color='#F8FAFC', ec='#94A3B8', lw=1)
+    rect_res = patches.Rectangle((0.05, 0.27), 0.90, 0.19, transform=ax.transAxes, color='#F8FAFC', ec='#94A3B8', lw=1)
     ax.add_patch(rect_res)
 
     res_text = (
@@ -100,19 +106,21 @@ def generate_fig6_executive_bulletin():
         "• IV Fluid Saline Supplies: Mobilize +1,197 saline bags to high-surge civil surgeon centers.\n"
         "• Emergency Vector Control: Trigger targeted fogging & larviciding in Ward 14, 19, and 22 in Dhaka South."
     )
-    ax.text(0.07, 0.45, res_text, fontsize=8.5, color='#1E293B', va='top', transform=ax.transAxes)
+    ax.text(0.07, 0.44, res_text, fontsize=8.5, color='#1E293B', va='top', transform=ax.transAxes)
 
     # Section 3: Official Approval & Signature Box
-    ax.text(0.05, 0.24, "3. System Validation & Official Sign-Off", fontsize=11, fontweight='bold', color='#1E3A8A', transform=ax.transAxes)
+    ax.text(0.05, 0.23, "3. System Validation & Official Sign-Off", fontsize=11, fontweight='bold', color='#1E3A8A', transform=ax.transAxes)
 
-    rect_sign = patches.Rectangle((0.05, 0.06), 0.90, 0.15, transform=ax.transAxes, color='#FFFFFF', ec='#CBD5E1', lw=1)
+    rect_sign = patches.Rectangle((0.05, 0.05), 0.90, 0.15, transform=ax.transAxes, color='#FFFFFF', ec='#CBD5E1', lw=1)
     ax.add_patch(rect_sign)
 
-    ax.text(0.10, 0.17, "Prepared By: EpiST-Shield Automated Decision Engine", fontsize=8.5, fontweight='bold', transform=ax.transAxes)
-    ax.text(0.10, 0.14, "System Usability Audit Score: 88.4 / 100 (Grade A+ Excellent)", fontsize=8.5, color='#059669', transform=ax.transAxes)
-    ax.text(0.10, 0.11, "Repository Reference: Open-Source MIT License", fontsize=8.5, color='#64748B', transform=ax.transAxes)
+    ax.text(0.08, 0.15, "Prepared By: EpiST-Shield Automated Decision Engine", fontsize=8.5, fontweight='bold', transform=ax.transAxes)
+    ax.text(0.08, 0.12, "System Usability Audit Score: 88.4 / 100 (Grade A+ Excellent)", fontsize=8.5, color='#059669', transform=ax.transAxes)
+    ax.text(0.08, 0.09, "Repository Reference: Open-Source MIT License", fontsize=8.5, color='#64748B', transform=ax.transAxes)
 
-    ax.text(0.65, 0.10, "___________________________\nAuthorized Public Health Official\n(Illustrative Demonstration Sign-Off)", fontsize=8.5, fontweight='bold', ha='center', transform=ax.transAxes)
+    ax.text(0.70, 0.13, "__________________________", fontsize=9, color='#475569', ha='center', transform=ax.transAxes)
+    ax.text(0.70, 0.10, "Authorized Public Health Official", fontsize=8.5, fontweight='bold', color='#1E293B', ha='center', transform=ax.transAxes)
+    ax.text(0.70, 0.08, "(Demonstration Sign-Off)", fontsize=7.5, color='#64748B', ha='center', transform=ax.transAxes)
 
     plt.tight_layout()
     plt.savefig(output_path, dpi=300, bbox_inches='tight')

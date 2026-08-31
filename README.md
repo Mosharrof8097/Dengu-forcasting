@@ -43,7 +43,7 @@ graph TD
     A[Client Web Browser / Presentation Layer] -->|HTTP REST API JSON| B[FastAPI Backend Engine]
     B -->|Dynamic Deserialization| C[Keras 3.x / TensorFlow Core]
     C -->|Spatiotemporal Tensor Ingestion| D[Pre-Trained EpiST-Former Model]
-    B -->|CMDP Optimization| E[Prescriptive Resource Allocation Module]
+    B -->|Rule-Based Allocation| E[Prescriptive Resource Allocation Module]
     E -->|Hospital Beds / NS1 Kits / Saline Bags| A
     D -->|Daily Case Forecast Vector| B
 ```
@@ -95,7 +95,7 @@ The main interface presents a unified command center for public health decision-
 
 - **Top Live Indicator Cards:** Displays real-time risk level (`HIGH`, `MODERATE`, `LOW`), expected total cases over the selected horizon, projected peak risk day, and daily average incidence.
 - **Dynamic Multi-Horizon Time-Series Chart:** Renders projected daily case trajectories for 7, 14, 21, or 30 days with threshold lines for critical epidemic surges ($\ge 50$ cases/day).
-- **Geospatial Risk Heatmap:** Interactive Leaflet.js map color-coding 11 focal endemic districts (Dhaka, Chittagong, Mymensingh, Gazipur, Narayanganj, Khulna, Barishal, Rajshahi, Sylhet, Cumilla, and Faridpur) by risk severity.
+- **Geospatial Risk Heatmap:** Interactive Leaflet.js map color-coding 11 focal endemic districts (Barishal, Chattogram, Dhaka, Faridpur, Gazipur, Gopalganj, Khulna, Mymensingh, Rajshahi, Rangpur, and Sylhet) by risk severity.
 - **Prescriptive Healthcare Resource Cards:** Dynamically computes isolation bed requirements, NS1 rapid test kits, and IV saline fluid bags with animated urgency badges.
 
 ---

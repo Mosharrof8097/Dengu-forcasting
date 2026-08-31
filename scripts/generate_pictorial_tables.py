@@ -66,7 +66,7 @@ def generate_table1_image():
         ["Frontend Stack", "HTML5, Vanilla CSS3, JS ES6+", "Zero-dependency, ultra-fast UI rendering"],
         ["Geospatial Engine", "Leaflet.js v1.9 + GeoJSON", "11-District spatiotemporal risk choropleth"],
         ["AI Inference Model", "EpiST-Former (.keras)", "Dual Gated Spatiotemporal Graph Transformer"],
-        ["Prescriptive Engine", "CMDP / PPO Reinforcement Learning", "Automated Bed, Kit, & Saline Allocation Policy"],
+        ["Prescriptive Engine", "Rule-Based Operational Multipliers", "Automated Bed, Kit, & Saline Allocation Rules"],
         ["License & Access", "MIT Open Source License", "Full academic & field deployment accessibility"]
     ]
     col_widths = [0.25, 0.35, 0.40]

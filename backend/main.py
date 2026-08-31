@@ -139,22 +139,22 @@ class MultiHorizonRequest(BaseModel):
     vector_control_active: Optional[bool] = False
 
 DISTRICTS_11 = [
-    "Dhaka", "Chittagong", "Gazipur", "Narayanganj", 
-    "Khulna", "Barishal", "Rajshahi", "Sylhet", 
-    "Cumilla", "Faridpur", "Mymensingh"
+    "Barishal", "Chattogram", "Dhaka", "Faridpur", 
+    "Gazipur", "Gopalganj", "Khulna", "Mymensingh", 
+    "Rajshahi", "Rangpur", "Sylhet"
 ]
 
 DISTRICT_BASE_CASES = {
-    "Mymensingh": 45.0,
     "Dhaka": 85.0,
-    "Chittagong": 65.0,
+    "Chattogram": 65.0,
+    "Mymensingh": 45.0,
     "Gazipur": 50.0,
-    "Narayanganj": 48.0,
+    "Rangpur": 32.0,
     "Khulna": 38.0,
     "Barishal": 32.0,
     "Rajshahi": 28.0,
     "Sylhet": 25.0,
-    "Cumilla": 35.0,
+    "Gopalganj": 22.0,
     "Faridpur": 30.0
 }
 

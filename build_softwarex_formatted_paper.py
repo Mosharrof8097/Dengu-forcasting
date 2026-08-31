@@ -397,7 +397,7 @@ def generate_multi_horizon_forecast(req: MultiHorizonRequest):
     add_body_p(doc, "Field usability was evaluated with 15 public health domain experts using the standardized System Usability Scale (SUS). EpiST-Shield achieved an overall score of 88.4 / 100 (Grade A+ Excellent), confirming high operational clarity and user satisfaction among health officers.")
 
     add_heading_2(doc, "4.3 Multi-District Spatial Forecasting Accuracy")
-    add_body_p(doc, "The model's spatiotemporal accuracy was evaluated across all 11 focal districts (Dhaka, Chittagong, Mymensingh, Gazipur, Narayanganj, Khulna, Rajshahi, Sylhet, Barishal, Faridpur, and Cumilla) (Figure 6), demonstrating consistent predictive precision across 7-, 14-, 21-, and 30-day forecast horizons.")
+    add_body_p(doc, "The model's spatiotemporal accuracy was evaluated across all 11 focal districts (Barishal, Chattogram, Dhaka, Faridpur, Gazipur, Gopalganj, Khulna, Mymensingh, Rajshahi, Rangpur, and Sylhet) (Figure 6), demonstrating consistent predictive precision across 7-, 14-, 21-, and 30-day forecast horizons.")
 
     add_figure_img(doc, "fig7_spatial_performance_matrix.png", "Fig. 6. Spatiotemporal outbreak forecasting accuracy and risk classification matrix across all 11 focal districts of Bangladesh.")
 

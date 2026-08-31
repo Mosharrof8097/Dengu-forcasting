@@ -57,14 +57,14 @@ def generate_fig1_architecture():
     # Arrow Tier 1 -> Tier 2
     ax.annotate("", xy=(3.7, 4.15), xytext=(3.4, 4.15), arrowprops=dict(arrowstyle="->", lw=2.5, color='#3B82F6'))
 
-    # --- TIER 2: DEEP LEARNING & RL AI ENGINE (Middle Left) ---
+    # --- TIER 2: DEEP LEARNING & PRESCRIPTIVE ENGINE (Middle Left) ---
     tier2_bg = patches.FancyBboxPatch((3.8, 0.5), 3.4, 7.3, boxstyle="round,pad=0.2", fc="#F0FDF4", ec="#BBF7D0", lw=1.5)
     ax.add_patch(tier2_bg)
-    ax.text(5.5, 7.5, "Core AI & RL Engine", fontsize=11, fontweight='bold', color='#15803D', ha='center')
+    ax.text(5.5, 7.5, "Core AI & Prescriptive Engine", fontsize=11, fontweight='bold', color='#15803D', ha='center')
 
     ai_components = [
         ("EpiST-Former Architecture", "Adaptive Spatial Graph Layer\nSoftmax(ReLU(E1 • E2^T))\nMeteorological Gated Cell\nPhysics Epidemic Loss", 5.2, "#DCFCE7", "#16A34A"),
-        ("CMDP / PPO Allocator", "State: Outbreak Risk Tiers\nActions: Bed Transfers & Kits\nConstraints: Bed Thresholds\nPolicy: Optimal Resource Transfer", 2.6, "#F0FDF4", "#0D9488"),
+        ("Rule-Based Allocator", "Input: Peak & Cumulative Cases\nMultipliers: 3.0x Beds, 1.8x Kits\nDirectives: Saline & Kit Dispatch\nRules: Deterministic Multipliers", 2.6, "#F0FDF4", "#0D9488"),
         ("Model Storage (.keras)", "Pre-compiled Tensor Graph\nInstant Startup RAM Load", 0.8, "#FFFFFF", "#10B981")
     ]
     for title, desc, y_pos, bg, ec in ai_components:
@@ -83,9 +83,9 @@ def generate_fig1_architecture():
 
     endpoints = [
         ("/api/predict", "POST • 0.02ms Latency\n21-Day Risk Forecasting"),
-        ("/api/allocate", "POST • CMDP RL Policy\nBeds & Kit Directives"),
+        ("/api/allocate", "POST • Rule-Based Policy\nBeds & Kit Directives"),
         ("/api/simulate_weather", "POST • What-If Sliders\nMonsoon Stress-Testing"),
-        ("/api/explain_shap", "POST • Spatial XAI\nClimate Driver Attribution")
+        ("/api/export_pdf", "POST • Executive Bulletin\nPDF Report Output")
     ]
     for idx, (ep, desc) in enumerate(endpoints):
         y_pos = 5.7 - idx * 1.6
@@ -172,28 +172,29 @@ def generate_fig5_sus_evaluation():
     fig = plt.figure(figsize=(12, 5), dpi=300)
     fig.patch.set_facecolor('#FFFFFF')
 
-    # Sub-plot 1: Radar Chart for 10 SUS Items
+    # Sub-plot 1: Radar Chart for 10 SUS Items (Reverse-Scored: r* = 6 - r)
     ax1 = fig.add_subplot(121, polar=True)
     
     categories = [
-        '1. System Use', '2. Complexity', '3. Ease of Use', '4. Tech Support',
-        '5. Integration', '6. Consistency', '7. Learnability', '8. Cumbersomeness',
-        '9. Confidence', '10. Prereq Knowledge'
+        '1. System Use', '2. Low Complexity*', '3. Ease of Use', '4. Minimal Support*',
+        '5. Integration', '6. High Consistency*', '7. Learnability', '8. Low Cumbersomeness*',
+        '9. Confidence', '10. Minimal Prereq*'
     ]
     N = len(categories)
     angles = [n / float(N) * 2 * np.pi for n in range(N)]
     angles += angles[:1]
 
-    scores = [4.6, 1.2, 4.7, 1.1, 4.5, 4.8, 4.6, 1.2, 4.7, 1.3]
+    # Reverse-scored even items: 6 - raw_score (6 - 1.2 = 4.8, 6 - 1.1 = 4.9, 6 - 1.2 = 4.8, 6 - 1.3 = 4.7)
+    scores = [4.6, 4.8, 4.7, 4.9, 4.5, 4.8, 4.6, 4.8, 4.7, 4.7]
     scores += scores[:1]
 
     ax1.set_theta_offset(np.pi / 2)
     ax1.set_theta_direction(-1)
     plt.xticks(angles[:-1], categories, size=8)
     
-    ax1.plot(angles, scores, linewidth=2, linestyle='solid', color='#0D9488', label='Mean SUS Rating')
+    ax1.plot(angles, scores, linewidth=2, linestyle='solid', color='#0D9488', label='Reverse-Scored SUS Rating')
     ax1.fill(angles, scores, color='#0D9488', alpha=0.25)
-    ax1.set_title("A. Itemized System Usability Scale (SUS) Ratings\n(N = 15 Health Experts)", fontsize=11, fontweight='bold', pad=20)
+    ax1.set_title("A. Reverse-Scored System Usability Scale (SUS) Ratings\n(*Even items reverse-scored r* = 6 - r; N = 15)", fontsize=10, fontweight='bold', pad=20)
     ax1.set_rlabel_position(0)
     plt.yticks([1, 2, 3, 4, 5], ["1", "2", "3", "4", "5"], color="grey", size=7)
     plt.ylim(0, 5)
