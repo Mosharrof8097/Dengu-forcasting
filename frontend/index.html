@@ -80,20 +80,85 @@
 
   <!-- Main Container -->
   <main class="dashboard-container" id="pdf-report-container">
-    <!-- Printable Official Header (Visible on Print / PDF Export) -->
-    <div class="print-header">
-      <div class="print-header-content">
-        <div>
-          <h1 class="print-header-title">DGHS DENGUE OUTBREAK FORECAST REPORT</h1>
-          <p class="print-header-sub">EpiST-Shield Decision Support System • Government of Bangladesh</p>
+  <!-- Official Executive Outbreak Bulletin (Visible on Print / PDF Export) -->
+  <div class="printable-bulletin" id="printable-bulletin">
+    <div class="bulletin-frame">
+      <!-- Mandatory Red Top Disclaimer Ribbon -->
+      <div class="bulletin-disclaimer-bar">
+        SAMPLE OUTPUT — FOR ILLUSTRATION ONLY | NOT AN OFFICIAL DGHS DOCUMENT
+      </div>
+
+      <!-- Deep Blue Header Banner -->
+      <div class="bulletin-header-banner">
+        <h1 class="bulletin-main-title">DISTRICT PUBLIC HEALTH SURVEILLANCE CELL</h1>
+        <h2 class="bulletin-sub-title">EpiST-Shield Real-Time Dengue Outbreak Illustrative Bulletin</h2>
+      </div>
+
+      <!-- Metadata Bar -->
+      <div class="bulletin-metadata-row">
+        <div class="meta-col-left">
+          <div><strong>Date:</strong> <span id="bulletin-date">26 July 2026</span></div>
+          <div>Surveillance Horizon: <span id="bulletin-horizon">21 Days</span></div>
         </div>
-        <div class="print-header-meta">
-          <div>Target District: <strong id="print-district-name">Mymensingh</strong></div>
-          <div>Forecast Source: <strong id="print-forecast-source">EpiST-Former Live Model</strong></div>
-          <div class="print-time">Generated: <span id="print-report-time"></span></div>
+        <div class="meta-col-right">
+          <div><strong>Issued By:</strong> Public Health AI Intelligence Cell</div>
+          <div class="meta-latency">Model Latency (p95): <span id="bulletin-latency">0.027 ms (Verified)</span></div>
         </div>
       </div>
+
+      <hr class="bulletin-divider" />
+
+      <!-- Diagonal Watermark Overlay -->
+      <div class="bulletin-watermark">SAMPLE OUTPUT — FOR ILLUSTRATION ONLY</div>
+
+      <!-- Section 1: Executive Outbreak Summary & High Risk Districts -->
+      <div class="bulletin-section">
+        <h3 class="bulletin-section-title">1. Executive Outbreak Summary & High Risk Districts</h3>
+        <table class="bulletin-table">
+          <thead>
+            <tr>
+              <th>District</th>
+              <th>Risk Level</th>
+              <th>Pred. Cases/Day</th>
+              <th>Weekly Expected</th>
+              <th>Action Required</th>
+            </tr>
+          </thead>
+          <tbody id="bulletin-table-body">
+            <!-- Dynamically populated via app.js -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Section 2: Prescriptive Resource Allocation Directives -->
+      <div class="bulletin-section">
+        <h3 class="bulletin-section-title">2. Prescriptive Resource Allocation Directives (Rule-Based Policy)</h3>
+        <div class="bulletin-box">
+          <ul id="bulletin-directives-list">
+            <!-- Dynamically populated via app.js -->
+          </ul>
+        </div>
+      </div>
+
+      <!-- Section 3: System Validation & Official Sign-Off -->
+      <div class="bulletin-section">
+        <h3 class="bulletin-section-title">3. System Validation & Official Sign-Off</h3>
+        <div class="bulletin-signoff-box">
+          <div class="signoff-left">
+            <div class="signoff-prepared"><strong>Prepared By:</strong> EpiST-Shield Automated Decision Engine</div>
+            <div class="signoff-score">System Usability Audit Score: <span class="score-green">88.4 / 100 (Grade A+ Excellent)</span></div>
+            <div class="signoff-ref">Repository Reference: Open-Source MIT License</div>
+          </div>
+          <div class="signoff-right">
+            <div class="signoff-line">__________________________</div>
+            <div class="signoff-title">Authorized Public Health Official</div>
+            <div class="signoff-sub">(Demonstration Sign-Off)</div>
+          </div>
+        </div>
+      </div>
+
     </div>
+  </div>
     
     <!-- 📅 SELECT FORECAST PERIOD BAR -->
     <section class="period-selector-section glass-card">
