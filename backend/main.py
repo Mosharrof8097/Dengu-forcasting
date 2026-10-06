@@ -35,6 +35,7 @@ Removed outright, with the reason:
 """
 import json
 import os
+import sys
 import time
 from typing import Dict, List, Optional
 
@@ -112,6 +113,14 @@ def _need(obj, what: str):
 _model = None
 _model_error = None
 try:
+    # This module sits next to main.py, but a bare import only resolves when
+    # the process was started from inside backend/. Under a serverless
+    # handler the entry point is elsewhere and the import fails, which is how
+    # the model came to be unavailable in production while every local run
+    # was fine. Putting this file's own directory on the path first makes the
+    # import independent of how the process was launched.
+    if HERE not in sys.path:
+        sys.path.insert(0, HERE)
     from epist_numpy import get_model, LOOKBACK, N_BIO, N_WEATHER
     _model = get_model()
 except Exception as exc:                                  # noqa: BLE001

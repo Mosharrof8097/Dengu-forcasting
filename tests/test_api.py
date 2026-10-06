@@ -155,6 +155,33 @@ def test_the_published_model_runs_without_tensorflow():
     assert info["runtime"] == "numpy"
 
 
+def test_the_model_loads_when_main_is_imported_by_path():
+    """It did not. `from epist_numpy import ...` resolves only when the
+    directory holding it is already on sys.path -- true when uvicorn is
+    started inside backend/, false under a serverless handler that loads
+    main.py by file path. Every local run worked while the deployment
+    answered ModuleNotFoundError on every model request and still reported
+    itself healthy.
+
+    Loading by path with the directory deliberately absent from sys.path is
+    what reproduces it; simply changing the working directory does not.
+    """
+    import subprocess
+    backend = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "backend"))
+    probe = (
+        "import importlib.util, sys\n"
+        f"sys.path = [p for p in sys.path if p not in ({backend!r}, '')]\n"
+        f"spec = importlib.util.spec_from_file_location('m', {backend + '/main.py'!r})\n"
+        "m = importlib.util.module_from_spec(spec)\n"
+        "spec.loader.exec_module(m)\n"
+        "print(m._model is not None, m._model_error)\n"
+    )
+    out = subprocess.run([sys.executable, "-c", probe], cwd="/",
+                         capture_output=True, text=True, timeout=180)
+    assert out.stdout.startswith("True"), (
+        f"model did not load: {out.stdout.strip()} {out.stderr[-400:]}")
+
+
 def test_prediction_is_deterministic():
     rng = np.random.default_rng(0)
     p = {"bio": rng.normal(size=(21, 3)).tolist(),
