@@ -1,0 +1,49 @@
+# Continuous integration.
+#
+# The point is not coverage for its own sake. Each test in tests/test_api.py
+# guards against a defect this project has already shipped once, so a green
+# run is evidence that none of them has come back.
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install runtime dependencies
+        # Deliberately requirements.txt and not requirements-dev.txt: if the
+        # service ever needs TensorFlow again to answer a request, this step
+        # is where it should fail.
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest httpx
+
+      - name: Confirm the service needs no TensorFlow
+        run: |
+          if python -c "import tensorflow" 2>/dev/null; then
+            echo "TensorFlow is installed in the runtime environment; this"
+            echo "test cannot prove the service runs without it."
+            exit 1
+          fi
+          echo "TensorFlow absent, as intended."
+
+      - name: Run tests
+        run: python -m pytest tests/ -v

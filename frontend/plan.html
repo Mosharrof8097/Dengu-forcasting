@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Capacity planning — Bangladesh dengue</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html">Record<span class="tag">what happened</span></a>
+  <a href="forecast.html">Forecast<span class="tag">what may happen</span></a>
+  <a href="plan.html" class="on">Plan<span class="tag">what to prepare</span></a>
+</nav>
+
+<header class="hdr">
+  <div>
+    <h1>Capacity planning</h1>
+    <p class="sub">How many dengue beds a district has needed, at a service
+      level you choose.</p>
+  </div>
+  <p class="provenance">
+    There is no multiplier anywhere on this page. Bed demand is the observed
+    occupancy distribution from the DGHS bulletins, and length of stay is
+    measured from the bulletins' own stock column. The one judgement is the
+    service level, and it is yours.
+  </p>
+</header>
+
+<section class="controls">
+  <label class="field">District
+    <select id="pl-district"></select>
+  </label>
+  <label class="field">Period
+    <select id="pl-period">
+      <option value="occupancy_season" selected>Dengue season (Jul–Nov)</option>
+      <option value="occupancy">Whole year</option>
+    </select>
+  </label>
+  <div class="slider">
+    <label for="pl-level">Service level</label>
+    <input type="range" id="pl-level" min="0" max="4" step="1" value="3">
+    <span class="val" id="pl-level-v">95%</span>
+  </div>
+</section>
+
+<section class="hero">
+  <div class="k" id="pl-hero-k">Beds to have ready</div>
+  <div class="v"><span id="pl-hero-v">—</span><span class="u" id="pl-hero-u">beds</span></div>
+  <p class="why" id="pl-hero-why">—</p>
+</section>
+
+<div class="grid2">
+  <div>
+    <div class="stats">
+      <div class="stat">
+        <div class="k">Median length of stay <span class="pill pill-measured">measured</span></div>
+        <div class="v" id="pl-los">—</div>
+        <div class="k" id="pl-los-n" style="margin-top:4px">—</div>
+      </div>
+      <div class="stat">
+        <div class="k">Busiest day ever recorded</div>
+        <div class="v" id="pl-max">—</div>
+        <div class="k" id="pl-max-note" style="margin-top:4px">occupancy</div>
+      </div>
+      <div class="stat">
+        <div class="k">Days of record</div>
+        <div class="v" id="pl-ndays">—</div>
+        <div class="k" style="margin-top:4px">bulletins with this district reporting</div>
+      </div>
+      <div class="stat">
+        <div class="k">Mean admissions per day</div>
+        <div class="v" id="pl-adm">—</div>
+        <div class="k" style="margin-top:4px">across the whole record</div>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>Occupancy distribution
+        <span class="h2sub">the bar you have chosen is highlighted</span></h2>
+      <div class="chart-tall"><canvas id="pl-chart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>All districts at this service level
+      <span class="h2sub">64 districts; Dhaka is shown split into its metropolitan and non-metropolitan parts</span></h2>
+    <div style="max-height:620px;overflow:auto">
+      <table class="tbl">
+        <thead><tr>
+          <th>District</th>
+          <th class="num">Beds</th>
+          <th class="num">LOS (d)</th>
+          <th class="num">Peak seen</th>
+        </tr></thead>
+        <tbody id="pl-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<p class="caveat" id="pl-caveat">
+  <b>This is a historical distribution, not a forecast.</b> It says what this
+  district has needed before, which is the right starting point for a standing
+  capacity decision. It is not a statement about the coming season — if an
+  epidemic exceeds anything in the record, so will the requirement. For a
+  forward-looking figure see the Forecast tab, and read the coverage figures
+  there before using it.
+</p>
+
+<details class="derive">
+  <summary>How this number was derived</summary>
+  <div class="body">
+    <p><b>1. Occupancy comes from the bulletins, not from cases.</b> Each DGHS
+      bulletin prints the number of patients currently admitted per district.
+      That column <em>is</em> bed demand; nothing needs to be inferred from case
+      counts. The service level you pick selects a quantile of those observed
+      daily values.</p>
+    <p><b>2. The record is internally consistent.</b> The identity
+      <code>occupancy[t] = occupancy[t−1] + admissions − discharges − deaths</code>
+      reproduces the printed stock exactly on <b>99.3%</b> of 106,179
+      consecutive day-pairs. The occupancy column is therefore not a separate,
+      possibly inconsistent series — it is tied to the flows.</p>
+    <p><b>3. Length of stay is measured, not assumed.</b> By Little's Law,
+      LOS = occupancy ÷ admission rate. It is computed only on days with at
+      least 5 admissions, because the ratio is meaningless when the denominator
+      is one or two patients, and the median is reported because that resists
+      the remaining small denominators. It is shown here for interpretation; the
+      bed figure does not depend on it, since occupancy is observed directly.</p>
+    <p><b>4. Season matters more than the annual average.</b> Dengue in
+      Bangladesh is concentrated in July–November, and the seasonal and
+      all-year distributions differ by close to an order of magnitude. Sizing on
+      the annual figure under-provisions the season; the seasonal view is the
+      default for that reason.</p>
+    <p><b>5. What a service level means.</b> At 95% the capacity you set is
+      enough on 95% of days in the historical distribution and short on the
+      other 5%. It is not a safety guarantee, and the right level depends on
+      what being short costs you against what idle capacity costs you — a
+      judgement no dataset can make.</p>
+    <p><b>What is deliberately absent.</b> Earlier versions of this app
+      multiplied peak cases by 3.0 for beds, 1.8 for test kits and 2.5 for
+      saline. Those constants had no source. Beds are now read from the record.
+      Kits and saline are <em>not shown at all</em>, because the bulletins
+      contain no consumable data and a number with no provenance is worse than
+      a blank.</p>
+  </div>
+</details>
+
+<footer class="ftr">
+  <p>Source: DGHS daily dengue press releases. 1,674 bulletin PDFs covering
+     1,669 distinct dates, 2019-08-27 to 2026-07-07, rebuilt at 64-district
+     daily resolution. Where the bulletin record is complete, national annual totals reconstruct to the published DGHS figures at 1.00× (2022: 62,084 against 62,382; 2023: 321,146 against 321,179). 2019 and 2024 fall short because bulletins are missing from the source — 125 and 238 dates survive — not because of extraction error.</p>
+  <p id="pl-meta"></p>
+</footer>
+
+<script src="vendor/chart.umd.js"></script>
+<script src="plan.js"></script>
+</body>
+</html>

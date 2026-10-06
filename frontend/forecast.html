@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forecast evaluation — Bangladesh dengue</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html">Record<span class="tag">what happened</span></a>
+  <a href="forecast.html" class="on">Forecast<span class="tag">what may happen</span></a>
+  <a href="plan.html">Plan<span class="tag">what to prepare</span></a>
+</nav>
+
+<header class="hdr">
+  <div>
+    <h1>Forecast evaluation</h1>
+    <p class="sub">Every forecast on this page was made before its outcome was
+      known, and is shown against what actually happened.</p>
+  </div>
+  <p class="provenance">
+    These are rolling-origin forecasts: at each origin the model saw only data
+    up to that date. Nothing is a live prediction of an unknown future, so you
+    can judge the forecaster against the record rather than take its word.
+  </p>
+</header>
+
+<div id="fc-missing" class="caveat" style="display:none">
+  <b>The forecast export has not been produced yet.</b> This page reads
+  <code>data/forecasts.json</code>, which is written once the rolling-origin
+  quantile evaluation finishes. The Record and Plan tabs do not depend on it and
+  work now.
+</div>
+
+<div id="fc-body" style="display:none">
+
+<section class="controls">
+  <label class="field">District
+    <select id="fc-district"></select>
+  </label>
+  <label class="field">Horizon
+    <select id="fc-horizon"></select>
+  </label>
+  <span class="hint" id="fc-span"></span>
+</section>
+
+<section class="grid3">
+  <div class="hero">
+    <div class="k">Interval quality vs persistence <span class="pill pill-model">model</span></div>
+    <div class="v"><span id="fc-wisgain">—</span><span class="u">better WIS</span></div>
+    <p class="why" id="fc-wis-why">—</p>
+  </div>
+  <div class="hero">
+    <div class="k">Point accuracy vs persistence</div>
+    <div class="v"><span id="fc-maecmp">—</span></div>
+    <p class="why" id="fc-mae-why">—</p>
+  </div>
+  <div class="hero">
+    <div class="k">Observed coverage of the 90% interval</div>
+    <div class="v"><span id="fc-cov">—</span></div>
+    <p class="why" id="fc-cov-why">—</p>
+  </div>
+</section>
+
+<p class="caveat" id="fc-covwarn" style="display:none"></p>
+
+<div class="panel">
+  <h2>Forecast against outcome
+    <span class="h2sub">shaded bands are the 50% and 90% conformalised prediction intervals</span></h2>
+  <div class="chart-tall"><canvas id="fc-chart"></canvas></div>
+</div>
+
+<div class="panel">
+  <h2>Coverage by evaluation fold
+    <span class="h2sub">where the intervals hold and where they do not; each fold is a different epidemic phase</span></h2>
+  <table class="tbl">
+    <thead><tr><th>Fold</th><th class="num">Coverage of the 90% interval</th><th>Reading</th></tr></thead>
+    <tbody id="fc-foldtbody"></tbody>
+  </table>
+</div>
+
+<p class="note">
+  <b>What this model is for.</b> On this panel the weekly lag-1 autocorrelation
+  is 0.973 — last week's count is an extremely strong guess at this week's. The
+  model does not reliably beat that guess on point accuracy: across six folds
+  its median is slightly worse at t+1, slightly better at t+2 and slightly
+  worse at t+4, which is a tie. The figures above say so rather than hide it.
+  What it does do better, by roughly a quarter on the weighted interval score
+  at every horizon, is state how uncertain it is — and for a capacity decision
+  the width of the interval is the part you act on.
+</p>
+
+<details class="derive">
+  <summary>How this evaluation was run</summary>
+  <div class="body">
+    <p><b>Rolling origin, with an embargo.</b> The record is split into six
+      folds by time. For each, the model trains on everything before the
+      origin and is scored on what follows, with a gap between them so that
+      no feature computed from a rolling window can see across the boundary.
+      Nothing is ever scored on data it trained on.</p>
+    <p><b>The folds are chosen to be hard.</b> They deliberately straddle
+      changes of epidemic phase — a quiet year followed by a growth year,
+      a growth phase followed by a peak. A random split would score far
+      better and would mean nothing, because the use case is precisely to
+      forecast across a change of phase.</p>
+    <p><b>Intervals are conformalised</b> (Romano et al., conformalised
+      quantile regression). The raw quantile fits covered only 74.6% at a
+      nominal 90%. Calibration uses the most recent 20% of each training
+      window, so the correction is estimated on the period most like the one
+      being predicted.</p>
+    <p><b>WIS</b> — the weighted interval score — scores the whole predictive
+      distribution, penalising both a wrong centre and an interval that is
+      wider than it needs to be. It is the standard metric in epidemic
+      forecast evaluation (it is what the COVID-19 Forecast Hub used), which
+      is why the headline comparison is stated in it rather than in error
+      alone.</p>
+    <p><b>Persistence+</b> is the honest baseline: last observed value as the
+      point forecast, with an interval from the historical spread of
+      week-on-week changes. It is reported because on a panel this
+      autocorrelated, a model that cannot beat it is not useful, and that
+      comparison should be in front of the reader rather than in an appendix.</p>
+    <p><b>Coverage below nominal is reported, not corrected away.</b> Where
+      the 90% interval covers less than 90% of outcomes, capacity sized from
+      it is too small — an error in the dangerous direction. The fold table
+      above shows exactly where that happens.</p>
+  </div>
+</details>
+
+<footer class="ftr">
+  <p id="fc-meta"></p>
+  <p>Source: DGHS daily dengue press releases rebuilt at 64-district daily
+     resolution, aggregated to complete weeks. Partial weeks are excluded from
+     evaluation; only weeks with all seven days reported are used.</p>
+</footer>
+
+</div>
+
+<script src="vendor/chart.umd.js"></script>
+<script src="forecast.js"></script>
+</body>
+</html>

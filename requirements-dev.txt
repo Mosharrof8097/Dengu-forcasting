@@ -1,0 +1,15 @@
+# Development and build only. Not installed in the deployed service.
+#
+# TensorFlow appears here and nowhere else: it is needed to read the .keras
+# model in pipeline/export_weights.py and to assert in
+# backend/verify_against_keras.py that the numpy port still matches it.
+# Training needs TensorFlow; serving does not.
+#
+# pandas is needed by the export scripts in pipeline/, which turn the locked
+# dataset into the three artifacts the application reads. It is a build-time
+# dependency, not a runtime one.
+-r requirements.txt
+pandas>=2.0.0
+tensorflow>=2.15.0
+pytest>=7.0
+httpx>=0.24

@@ -1,17 +1,15 @@
-# Ignore heavy paper files, manuscripts, images, and build scripts from Vercel deployment
+# Keep the deployment small, but never exclude anything the service needs to
+# run. An earlier version of this file excluded *.json and *.npz, which would
+# have shipped the application without its three data artifacts and without
+# the model weights -- a deployment that starts cleanly and answers every
+# data request with 503.
 *.docx
-*.png
-*.jpg
-*.jpeg
 *.pdf
-*.npz
-*.csv
-*.json
-!vercel.json
-05_Paper_Figures/
-benchmarks/
-scripts/
-paper_draft/
+_archive/
+tests/
+.github/
+requirements-dev.txt
+
+# Documentation, except the one page a visitor lands on.
 *.md
 !README.md
-build_softwarex_formatted_paper.py

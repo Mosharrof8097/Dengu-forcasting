@@ -10,3 +10,13 @@ ENV/
 *.log
 .DS_Store
 .~lock.*
+
+# Working material kept on disk but out of the published repository:
+# manuscript drafts, internal checklists, and the figures and scripts
+# superseded by the revision.
+_archive/
+
+# Peer-review working material: reviewer comments, the manuscript under
+# revision, the response plan, the defect record and the replacement
+# screenshots. None of it belongs in the public repository.
+Q2 revision jounal\ /

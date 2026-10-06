@@ -1,0 +1,5 @@
+canonical,weather_csv,note
+Chapainawabganj,Nawabganj,"NASA file uses the short form"
+CoxsBazar,Cox's Bazar,"apostrophe and space"
+Jhalokathi,Jhalokati,"transliteration variant"
+DhakaCity,Dhaka,"ঢাকা মহানগর sits inside Dhaka district; it has no weather row of its own, so it borrows Dhaka's"
