@@ -182,6 +182,26 @@ def test_the_model_loads_when_main_is_imported_by_path():
         f"model did not load: {out.stdout.strip()} {out.stderr[-400:]}")
 
 
+def test_the_model_loads_under_a_package_style_import():
+    """A serverless handler commonly imports the entry point as
+    `backend.main`, with only the project root on sys.path. That is the shape
+    the Vercel deployment uses, and the one that left the model unloaded in
+    production while every other import style worked."""
+    import subprocess
+    root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    probe = (
+        "import sys\n"
+        f"sys.path = [p for p in sys.path if p not in ({root + '/backend'!r}, '')]\n"
+        f"sys.path.insert(0, {root!r})\n"
+        "import backend.main as m\n"
+        "print(m._model is not None, m._model_error)\n"
+    )
+    out = subprocess.run([sys.executable, "-c", probe], cwd="/",
+                         capture_output=True, text=True, timeout=180)
+    assert out.stdout.startswith("True"), (
+        f"model did not load: {out.stdout.strip()} {out.stderr[-400:]}")
+
+
 def test_prediction_is_deterministic():
     rng = np.random.default_rng(0)
     p = {"bio": rng.normal(size=(21, 3)).tolist(),

@@ -113,15 +113,30 @@ def _need(obj, what: str):
 _model = None
 _model_error = None
 try:
-    # This module sits next to main.py, but a bare import only resolves when
-    # the process was started from inside backend/. Under a serverless
-    # handler the entry point is elsewhere and the import fails, which is how
-    # the model came to be unavailable in production while every local run
-    # was fine. Putting this file's own directory on the path first makes the
-    # import independent of how the process was launched.
+    # epist_numpy sits next to this file, but a bare import only resolves when
+    # backend/ happens to be on sys.path -- true when uvicorn is started from
+    # inside it, false under a serverless handler that imports this file as
+    # `backend.main` with only the project root on the path. That is how the
+    # model came to be unavailable in production while every local run was
+    # fine.
+    #
+    # Putting HERE on sys.path fixes the common case. Loading by file path
+    # fixes it regardless of how the handler chose to import this module, so
+    # both are done rather than betting on one and waiting a deploy cycle to
+    # discover the answer.
     if HERE not in sys.path:
         sys.path.insert(0, HERE)
-    from epist_numpy import get_model, LOOKBACK, N_BIO, N_WEATHER
+    try:
+        from epist_numpy import get_model, LOOKBACK, N_BIO, N_WEATHER
+    except ImportError:
+        import importlib.util
+        _spec = importlib.util.spec_from_file_location(
+            "epist_numpy", os.path.join(HERE, "epist_numpy.py"))
+        _mod = importlib.util.module_from_spec(_spec)
+        sys.modules["epist_numpy"] = _mod
+        _spec.loader.exec_module(_mod)
+        get_model = _mod.get_model
+        LOOKBACK, N_BIO, N_WEATHER = _mod.LOOKBACK, _mod.N_BIO, _mod.N_WEATHER
     _model = get_model()
 except Exception as exc:                                  # noqa: BLE001
     _model_error = f"{type(exc).__name__}: {exc}"
@@ -142,6 +157,18 @@ def health():
             "runtime": "numpy",
             "loaded": _model is not None,
             "error": _model_error,
+            # Reported only while the model fails to load. Whether the module
+            # and the weights are on disk separates "the deployment did not
+            # bundle them" from "the import could not resolve them", which the
+            # error alone does not distinguish -- and guessing between those
+            # two costs a deploy cycle each time.
+            "diagnostic": None if _model is not None else {
+                "module_on_disk": os.path.exists(
+                    os.path.join(HERE, "epist_numpy.py")),
+                "weights_on_disk": os.path.exists(
+                    os.path.join(HERE, "models", "epist_former_weights.npz")),
+                "backend_dir_on_path": HERE in sys.path,
+            },
             "parameters": _model.n_params if _model else None,
             "equivalence": "verified against the Keras reference to 7.9e-06 "
                            "maximum absolute difference; see "
